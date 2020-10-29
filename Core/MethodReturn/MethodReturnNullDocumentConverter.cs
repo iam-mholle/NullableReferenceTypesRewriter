@@ -14,6 +14,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using NullableReferenceTypesRewriter.Analysis;
 
 namespace NullableReferenceTypesRewriter.MethodReturn
 {
@@ -26,9 +27,10 @@ namespace NullableReferenceTypesRewriter.MethodReturn
       var syntax = await document.GetSyntaxRootAsync()
                    ?? throw new ArgumentException ($"Document '{document.FilePath}' does not support providing a syntax tree.");
 
-      var newSyntax = new MethodReturnNullAnnotator (semantic).Visit (syntax);
-
-      return document.WithSyntaxRoot (newSyntax);
+      // var newSyntax = new MethodReturnNullAnnotator (semantic).Visit (syntax);
+      var b = new MethodGraphBuilder (semantic);
+      b.Visit(syntax);
+      return document.WithSyntaxRoot (syntax);
     }
   }
 }

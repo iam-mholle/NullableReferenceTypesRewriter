@@ -54,14 +54,9 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
           new IDocumentConverter[]
           {
                 new MethodReturnNullDocumentConverter(),
-                new LocalDeclarationNullDocumentConverter(),
-                new CastExpressionNullDocumentConverter(),
-                new MethodArgumentFromInvocationNullDocumentConverter(),
-                new PropertyNullAnnotatorDocumentConverter(),
-                new ClassFieldNotInitializedDocumentConverter(),
           });
 
-       converted = await new InheritanceProjectConverter().Convert (converted);
+       // converted = await new InheritanceProjectConverter().Convert (converted);
 
       foreach (var (oldDocument, document) in converted)
       {

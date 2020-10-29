@@ -10,14 +10,6 @@ namespace NullableReferenceTypesRewriter.UnitTests.Analysis
     public void Test ()
     {
       var mg = new MethodGraph();
-      mg.AddMethod ("A");
-      mg.AddMethod ("B");
-      mg.AddMethod ("C");
-      mg.AddMethod ("D");
-      mg.AddDependency("A", "D");
-      mg.AddDependency("A", "B");
-      mg.AddDependency("A", "C");
-      mg.AddDependency("B", "C");
     }
   }
 }
