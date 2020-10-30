@@ -6,7 +6,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 {
   public class MethodGraph
   {
-    private readonly Dictionary<string, Method> _methods = new Dictionary<string, Method>();
+    private readonly Dictionary<string, IMethod> _methods = new Dictionary<string, IMethod>();
     private readonly Dictionary<string, List<Dependency>> _byFrom = new Dictionary<string, List<Dependency>>();
     private readonly Dictionary<string, List<Dependency>> _byTo = new Dictionary<string, List<Dependency>>();
 
@@ -30,6 +30,20 @@ namespace NullableReferenceTypesRewriter.Analysis
           });
 
       _methods[methodSymbol] = method;
+    }
+
+    public void AddExternalMethod (string uniqueName)
+    {
+      var method = new ExternalMethod (
+          () =>
+          {
+            if (_byTo.TryGetValue (uniqueName, out var parents))
+              return parents.Where(p => p.From != null && p.To != null).ToArray();
+
+            return new Dependency[0];
+          });
+
+      _methods[uniqueName] = method;
     }
 
     public void AddDependency (string fromMethodSymbol, string toMethodSymbol)
@@ -61,7 +75,7 @@ namespace NullableReferenceTypesRewriter.Analysis
       _byTo[toMethodSymbol].Add (dependency);
     }
 
-    public Method GetMethod (string methodSymbol)
+    public IMethod GetMethod (string methodSymbol)
     {
       return _methods[methodSymbol];
     }

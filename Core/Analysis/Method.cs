@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace NullableReferenceTypesRewriter.Analysis
 {
-  public class Method
+  public class Method : IMethod
   {
     private readonly SyntaxReference _methodSyntaxReference;
     private readonly Func<IReadOnlyCollection<Dependency>> _parents;

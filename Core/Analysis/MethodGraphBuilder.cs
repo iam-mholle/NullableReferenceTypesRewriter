@@ -35,6 +35,12 @@ namespace NullableReferenceTypesRewriter.Analysis
       if (symbolInfoCandidate.Symbol is IMethodSymbol invokedMethodSymbol && containingMethodDeclaration != null)
       {
         var containingMethodSymbol = _semanticModel.GetDeclaredSymbol (containingMethodDeclaration);
+
+        if (invokedMethodSymbol.DeclaringSyntaxReferences.IsEmpty)
+        {
+          _graph.AddExternalMethod (UniqueMethodSymbolNameGenerator.Generate (invokedMethodSymbol));
+        }
+
         _graph.AddDependency (
             UniqueMethodSymbolNameGenerator.Generate (containingMethodSymbol),
             UniqueMethodSymbolNameGenerator.Generate (invokedMethodSymbol));
