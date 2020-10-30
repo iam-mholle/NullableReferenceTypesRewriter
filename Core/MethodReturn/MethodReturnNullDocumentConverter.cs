@@ -20,6 +20,13 @@ namespace NullableReferenceTypesRewriter.MethodReturn
 {
   public class MethodReturnNullDocumentConverter : IDocumentConverter
   {
+    private readonly MethodGraphBuilder _graphBuilder;
+
+    public MethodReturnNullDocumentConverter (MethodGraphBuilder graphBuilder)
+    {
+      _graphBuilder = graphBuilder;
+    }
+
     public async Task<Document> Convert (Document document)
     {
       var semantic = await document.GetSemanticModelAsync()
@@ -27,9 +34,9 @@ namespace NullableReferenceTypesRewriter.MethodReturn
       var syntax = await document.GetSyntaxRootAsync()
                    ?? throw new ArgumentException ($"Document '{document.FilePath}' does not support providing a syntax tree.");
 
+      _graphBuilder.SetSemanticModel (semantic);
       // var newSyntax = new MethodReturnNullAnnotator (semantic).Visit (syntax);
-      var b = new MethodGraphBuilder (semantic);
-      b.Visit(syntax);
+      _graphBuilder.Visit(syntax);
       return document.WithSyntaxRoot (syntax);
     }
   }

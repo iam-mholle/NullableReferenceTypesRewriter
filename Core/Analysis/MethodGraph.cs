@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace NullableReferenceTypesRewriter.Analysis
@@ -16,14 +17,14 @@ namespace NullableReferenceTypesRewriter.Analysis
           () =>
           {
             if (_byTo.TryGetValue (methodSymbol, out var parents))
-              return parents.AsReadOnly();
+              return parents.Where(p => p.From != null && p.To != null).ToArray();
 
             return new Dependency[0];
           },
           () =>
           {
             if (_byFrom.TryGetValue (methodSymbol, out var parents))
-              return parents.AsReadOnly();
+              return parents.Where(p => p.From != null && p.To != null).ToArray();
 
             return new Dependency[0];
           });
@@ -34,8 +35,20 @@ namespace NullableReferenceTypesRewriter.Analysis
     public void AddDependency (string fromMethodSymbol, string toMethodSymbol)
     {
       var dependency = new Dependency (
-          () => _methods[fromMethodSymbol],
-          () => _methods[toMethodSymbol]);
+          () =>
+          {
+            if (_methods.TryGetValue (fromMethodSymbol, out var from))
+              return from;
+
+            return null!;
+          },
+          () =>
+          {
+            if (_methods.TryGetValue (toMethodSymbol, out var to))
+              return to;
+
+            return null!;
+          });
 
       if (!_byFrom.ContainsKey(fromMethodSymbol))
         _byFrom[fromMethodSymbol] = new List<Dependency>();

@@ -22,6 +22,7 @@ using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.MSBuild;
+using NullableReferenceTypesRewriter.Analysis;
 using NullableReferenceTypesRewriter.CastExpression;
 using NullableReferenceTypesRewriter.ClassFields;
 using NullableReferenceTypesRewriter.Inheritance;
@@ -49,11 +50,13 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
       var solution = await LoadSolutionSpace (solutionPath);
       var project = LoadProject (solution, projectName);
 
-      IEnumerable<(Document, Document)> converted = await ApplyConverter (
+      var graphBuilder = new MethodGraphBuilder();
+
+      IEnumerable<(Document, Document)> converted = ApplyConverter (
           project.Documents,
           new IDocumentConverter[]
           {
-                new MethodReturnNullDocumentConverter(),
+                new MethodReturnNullDocumentConverter(graphBuilder),
           });
 
        // converted = await new InheritanceProjectConverter().Convert (converted);
@@ -95,10 +98,9 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
       return project;
     }
 
-    private static Task<(Document, Document)[]> ApplyConverter (IEnumerable<Document> documents, IEnumerable<IDocumentConverter> converters)
+    private static (Document, Document)[] ApplyConverter (IEnumerable<Document> documents, IEnumerable<IDocumentConverter> converters)
     {
-      var tasks = documents.Select (async doc => (doc, await ConverterUtilities.ApplyAll (doc, converters)));
-      return Task.WhenAll(tasks);
+      return documents.Select (doc => (doc, ConverterUtilities.ApplyAll (doc, converters).GetAwaiter().GetResult())).ToArray();
     }
 
     private static Task<Solution> LoadSolutionSpace (string solutionPath)
