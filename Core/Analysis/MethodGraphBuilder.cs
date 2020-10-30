@@ -9,6 +9,8 @@ namespace NullableReferenceTypesRewriter.Analysis
     private SemanticModel? _semanticModel;
     private readonly MethodGraph _graph;
 
+    public IMethodGraph Graph => _graph;
+
     public MethodGraphBuilder()
     {
       _graph = new MethodGraph();

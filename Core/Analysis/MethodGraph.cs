@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace NullableReferenceTypesRewriter.Analysis
 {
-  public class MethodGraph
+  public class MethodGraph : IMethodGraph
   {
     private readonly Dictionary<string, IMethod> _methods = new Dictionary<string, IMethod>();
     private readonly Dictionary<string, List<Dependency>> _byFrom = new Dictionary<string, List<Dependency>>();
