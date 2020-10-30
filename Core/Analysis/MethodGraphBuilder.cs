@@ -40,7 +40,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 
         if (invokedMethodSymbol.DeclaringSyntaxReferences.IsEmpty)
         {
-          _graph.AddExternalMethod (UniqueMethodSymbolNameGenerator.Generate (invokedMethodSymbol));
+          _graph.AddExternalMethod (UniqueMethodSymbolNameGenerator.Generate (invokedMethodSymbol), invokedMethodSymbol);
         }
 
         _graph.AddDependency (

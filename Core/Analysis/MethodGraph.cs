@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace NullableReferenceTypesRewriter.Analysis
@@ -32,9 +33,10 @@ namespace NullableReferenceTypesRewriter.Analysis
       _methods[methodSymbol] = method;
     }
 
-    public void AddExternalMethod (string uniqueName)
+    public void AddExternalMethod (string uniqueName, IMethodSymbol methodSymbol)
     {
       var method = new ExternalMethod (
+          methodSymbol,
           () =>
           {
             if (_byTo.TryGetValue (uniqueName, out var parents))
