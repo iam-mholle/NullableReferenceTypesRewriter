@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -7,7 +8,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 {
   public class MethodGraph : IMethodGraph
   {
-    private readonly Dictionary<string, INode> _methods = new Dictionary<string, INode>();
+    private readonly Dictionary<string, INode> _members = new Dictionary<string, INode>();
     private readonly Dictionary<string, List<Dependency>> _byFrom = new Dictionary<string, List<Dependency>>();
     private readonly Dictionary<string, List<Dependency>> _byTo = new Dictionary<string, List<Dependency>>();
 
@@ -15,37 +16,24 @@ namespace NullableReferenceTypesRewriter.Analysis
     {
       var method = new Method (
           methodDeclarationSyntax,
-          () =>
-          {
-            if (_byTo.TryGetValue (methodSymbol, out var parents))
-              return parents.Where(p => p.From != null && p.To != null).ToArray();
+          CreateParentGetter (methodSymbol),
+          CreateChildrenGetter (methodSymbol));
 
-            return new Dependency[0];
-          },
-          () =>
-          {
-            if (_byFrom.TryGetValue (methodSymbol, out var parents))
-              return parents.Where(p => p.From != null && p.To != null).ToArray();
-
-            return new Dependency[0];
-          });
-
-      _methods[methodSymbol] = method;
+      _members[methodSymbol] = method;
     }
 
     public void AddExternalMethod (string uniqueName, IMethodSymbol methodSymbol)
     {
-      var method = new ExternalMethod (
-          methodSymbol,
-          () =>
-          {
-            if (_byTo.TryGetValue (uniqueName, out var parents))
-              return parents.Where(p => p.From != null && p.To != null).ToArray();
+      var method = new ExternalMethod (methodSymbol, CreateParentGetter (uniqueName));
 
-            return new Dependency[0];
-          });
+      _members[uniqueName] = method;
+    }
 
-      _methods[uniqueName] = method;
+    public void AddField (string uniqueName, FieldDeclarationSyntax fieldDeclarationSyntax)
+    {
+      var field = new Field (fieldDeclarationSyntax, CreateParentGetter (uniqueName));
+
+      _members[uniqueName] = field;
     }
 
     public void AddDependency (string fromMethodSymbol, string toMethodSymbol)
@@ -53,14 +41,14 @@ namespace NullableReferenceTypesRewriter.Analysis
       var dependency = new Dependency (
           () =>
           {
-            if (_methods.TryGetValue (fromMethodSymbol, out var from))
+            if (_members.TryGetValue (fromMethodSymbol, out var from))
               return from;
 
             return null!;
           },
           () =>
           {
-            if (_methods.TryGetValue (toMethodSymbol, out var to))
+            if (_members.TryGetValue (toMethodSymbol, out var to))
               return to;
 
             return null!;
@@ -79,7 +67,29 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     public INode GetMethod (string methodSymbol)
     {
-      return _methods[methodSymbol];
+      return _members[methodSymbol];
+    }
+
+    private Func<IReadOnlyCollection<Dependency>> CreateParentGetter (string key)
+    {
+      return () =>
+      {
+        if (_byTo.TryGetValue (key, out var parents))
+          return parents.Where (p => p.From != null && p.To != null).ToArray();
+
+        return new Dependency[0];
+      };
+    }
+
+    private Func<IReadOnlyCollection<Dependency>> CreateChildrenGetter (string key)
+    {
+      return () =>
+      {
+        if (_byFrom.TryGetValue (key, out var children))
+          return children.Where (p => p.From != null && p.To != null).ToArray();
+
+        return new Dependency[0];
+      };
     }
   }
 }

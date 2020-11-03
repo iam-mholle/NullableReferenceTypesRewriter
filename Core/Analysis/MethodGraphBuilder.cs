@@ -24,7 +24,7 @@ namespace NullableReferenceTypesRewriter.Analysis
     public override void VisitMethodDeclaration (MethodDeclarationSyntax node)
     {
       var symbol = _semanticModel.GetDeclaredSymbol (node);
-      _graph.AddMethod(UniqueMethodSymbolNameGenerator.Generate(symbol), node);
+      _graph.AddMethod(UniqueSymbolNameGenerator.Generate(symbol), node);
 
       base.VisitMethodDeclaration (node);
     }
@@ -40,15 +40,27 @@ namespace NullableReferenceTypesRewriter.Analysis
 
         if (invokedMethodSymbol.DeclaringSyntaxReferences.IsEmpty)
         {
-          _graph.AddExternalMethod (UniqueMethodSymbolNameGenerator.Generate (invokedMethodSymbol), invokedMethodSymbol);
+          _graph.AddExternalMethod (UniqueSymbolNameGenerator.Generate (invokedMethodSymbol), invokedMethodSymbol);
         }
 
         _graph.AddDependency (
-            UniqueMethodSymbolNameGenerator.Generate (containingMethodSymbol),
-            UniqueMethodSymbolNameGenerator.Generate (invokedMethodSymbol));
+            UniqueSymbolNameGenerator.Generate (containingMethodSymbol),
+            UniqueSymbolNameGenerator.Generate (invokedMethodSymbol));
       }
 
       base.VisitInvocationExpression (node);
+    }
+
+    public override void VisitFieldDeclaration (FieldDeclarationSyntax node)
+    {
+      foreach (var declaredField in node.Declaration.Variables)
+      {
+        var symbol = (IFieldSymbol) _semanticModel.GetDeclaredSymbol (declaredField);
+        // TODO: Do I want to pass in node here?
+        _graph.AddField (UniqueSymbolNameGenerator.Generate (symbol), node);
+      }
+
+      base.VisitFieldDeclaration (node);
     }
   }
 }
