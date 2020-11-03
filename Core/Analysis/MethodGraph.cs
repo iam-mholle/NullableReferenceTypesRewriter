@@ -65,9 +65,19 @@ namespace NullableReferenceTypesRewriter.Analysis
       _byTo[toMethodSymbol].Add (dependency);
     }
 
-    public INode GetMethod (string methodSymbol)
+    public INode GetNode (string uniqueName)
     {
-      return _members[methodSymbol];
+      return _members[uniqueName];
+    }
+
+    public IReadOnlyCollection<INode> GetNodesWithoutChildren ()
+    {
+      return _members.Values.Where (n => n.Children.Count == 0).ToArray();
+    }
+
+    public IReadOnlyCollection<INode> GetNodesWithoutParents ()
+    {
+      return _members.Values.Where (n => n.Parents.Count == 0).ToArray();
     }
 
     private Func<IReadOnlyCollection<Dependency>> CreateParentGetter (string key)

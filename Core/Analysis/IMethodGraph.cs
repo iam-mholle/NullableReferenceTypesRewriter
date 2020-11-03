@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 
 namespace NullableReferenceTypesRewriter.Analysis
 {
   public interface IMethodGraph
   {
-    public INode GetMethod (string uniqueMethodName);
+    INode GetNode (string uniqueMethodName);
+    IReadOnlyCollection<INode> GetNodesWithoutChildren ();
+    IReadOnlyCollection<INode> GetNodesWithoutParents ();
   }
 }

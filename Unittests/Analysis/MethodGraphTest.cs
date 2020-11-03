@@ -30,8 +30,8 @@ public class B
 
       builder.SetSemanticModel (compilation.Item1);
       builder.Visit (compilation.Item2);
-      var methodOfA = builder.Graph.GetMethod ("Test.A.DoStuff()");
-      var methodOfB = builder.Graph.GetMethod ("Test.B.DoMore()");
+      var methodOfA = builder.Graph.GetNode ("Test.A.DoStuff()");
+      var methodOfB = builder.Graph.GetNode ("Test.B.DoMore()");
 
       Assert.That (methodOfA, Is.Not.Null);
       Assert.That (methodOfB, Is.Not.Null);
