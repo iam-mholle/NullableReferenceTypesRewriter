@@ -17,5 +17,7 @@ namespace NullableReferenceTypesRewriter.Analysis
       Symbol = symbol;
       _parents = parents;
     }
+
+    public void Accept (MemberGraphVisitorBase visitor) => visitor.VisitExternalMethod (this);
   }
 }

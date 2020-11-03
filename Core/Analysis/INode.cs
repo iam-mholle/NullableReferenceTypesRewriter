@@ -6,5 +6,6 @@ namespace NullableReferenceTypesRewriter.Analysis
   {
     public IReadOnlyCollection<Dependency> Parents { get; }
     public IReadOnlyCollection<Dependency> Children { get; }
+    public void Accept (MemberGraphVisitorBase visitor);
   }
 }

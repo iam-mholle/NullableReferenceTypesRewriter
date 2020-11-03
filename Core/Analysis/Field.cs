@@ -13,6 +13,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     public IReadOnlyCollection<Dependency> Parents => _parents();
     public IReadOnlyCollection<Dependency> Children { get; } = new Dependency[0];
+
     public FieldDeclarationSyntax FieldDeclarationSyntax => (FieldDeclarationSyntax) _fieldSyntaxReference.GetSyntax();
     public SyntaxNode RewritableSyntaxNode { get; private set; }
 
@@ -28,5 +29,7 @@ namespace NullableReferenceTypesRewriter.Analysis
       RewritableSyntaxNode = rewriter.VisitFieldDeclaration ((FieldDeclarationSyntax)RewritableSyntaxNode)
                    ?? throw new InvalidOperationException ($"Could not rewrite {_fieldSyntaxReference.GetSyntax().ToString()}.");
     }
+
+    public void Accept (MemberGraphVisitorBase visitor) => visitor.VisitField (this);
   }
 }
