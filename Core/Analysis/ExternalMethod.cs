@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 
 namespace NullableReferenceTypesRewriter.Analysis
 {
-  public class ExternalMethod : IMethod
+  public class ExternalMethod : INode
   {
     private readonly Func<IReadOnlyCollection<Dependency>> _parents;
 

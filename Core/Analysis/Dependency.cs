@@ -4,13 +4,13 @@ namespace NullableReferenceTypesRewriter.Analysis
 {
   public class Dependency
   {
-    private readonly Func<IMethod> _from;
-    private readonly Func<IMethod> _to;
+    private readonly Func<INode> _from;
+    private readonly Func<INode> _to;
 
-    public IMethod From => _from();
-    public IMethod To => _to();
+    public INode From => _from();
+    public INode To => _to();
 
-    public Dependency (Func<IMethod> from, Func<IMethod> to)
+    public Dependency (Func<INode> from, Func<INode> to)
     {
       _from = @from;
       _to = to;

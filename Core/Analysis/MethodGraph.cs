@@ -7,7 +7,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 {
   public class MethodGraph : IMethodGraph
   {
-    private readonly Dictionary<string, IMethod> _methods = new Dictionary<string, IMethod>();
+    private readonly Dictionary<string, INode> _methods = new Dictionary<string, INode>();
     private readonly Dictionary<string, List<Dependency>> _byFrom = new Dictionary<string, List<Dependency>>();
     private readonly Dictionary<string, List<Dependency>> _byTo = new Dictionary<string, List<Dependency>>();
 
@@ -77,7 +77,7 @@ namespace NullableReferenceTypesRewriter.Analysis
       _byTo[toMethodSymbol].Add (dependency);
     }
 
-    public IMethod GetMethod (string methodSymbol)
+    public INode GetMethod (string methodSymbol)
     {
       return _methods[methodSymbol];
     }

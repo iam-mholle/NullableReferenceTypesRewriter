@@ -4,6 +4,6 @@ namespace NullableReferenceTypesRewriter.Analysis
 {
   public interface IMethodGraph
   {
-    public IMethod GetMethod (string uniqueMethodName);
+    public INode GetMethod (string uniqueMethodName);
   }
 }
