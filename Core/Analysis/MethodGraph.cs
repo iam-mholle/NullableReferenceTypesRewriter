@@ -12,10 +12,11 @@ namespace NullableReferenceTypesRewriter.Analysis
     private readonly Dictionary<string, List<Dependency>> _byFrom = new Dictionary<string, List<Dependency>>();
     private readonly Dictionary<string, List<Dependency>> _byTo = new Dictionary<string, List<Dependency>>();
 
-    public void AddMethod (string methodSymbol, MethodDeclarationSyntax methodDeclarationSyntax)
+    public void AddMethod (string methodSymbol, MethodDeclarationSyntax methodDeclarationSyntax, Document document)
     {
       var method = new Method (
           methodDeclarationSyntax,
+          document,
           CreateParentGetter (methodSymbol),
           CreateChildrenGetter (methodSymbol));
 

@@ -7,6 +7,7 @@ namespace NullableReferenceTypesRewriter.Analysis
   public class MethodGraphBuilder : CSharpSyntaxWalker
   {
     private SemanticModel? _semanticModel;
+    private Document? _document;
     private readonly MethodGraph _graph;
 
     public IMethodGraph Graph => _graph;
@@ -16,15 +17,16 @@ namespace NullableReferenceTypesRewriter.Analysis
       _graph = new MethodGraph();
     }
 
-    public void SetSemanticModel (SemanticModel semanticModel)
+    public void SetDocument (Document document)
     {
-      _semanticModel = semanticModel;
+      _document = document;
+      _semanticModel = document.GetSemanticModelAsync().GetAwaiter().GetResult();
     }
 
     public override void VisitMethodDeclaration (MethodDeclarationSyntax node)
     {
       var symbol = _semanticModel.GetDeclaredSymbol (node);
-      _graph.AddMethod(UniqueSymbolNameGenerator.Generate(symbol), node);
+      _graph.AddMethod(UniqueSymbolNameGenerator.Generate(symbol), node, _document!);
 
       base.VisitMethodDeclaration (node);
     }

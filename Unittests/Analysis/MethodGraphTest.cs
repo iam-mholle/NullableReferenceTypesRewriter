@@ -28,7 +28,7 @@ public class B
 ");
       var builder = new MethodGraphBuilder();
 
-      builder.SetSemanticModel (compilation.Item1);
+      // builder.SetSemanticModel (compilation.Item1);
       builder.Visit (compilation.Item2);
       var methodOfA = builder.Graph.GetNode ("Test.A.DoStuff()");
       var methodOfB = builder.Graph.GetNode ("Test.B.DoMore()");

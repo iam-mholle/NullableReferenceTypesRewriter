@@ -12,7 +12,6 @@
 //
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -23,13 +22,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.MSBuild;
 using NullableReferenceTypesRewriter.Analysis;
-using NullableReferenceTypesRewriter.CastExpression;
-using NullableReferenceTypesRewriter.ClassFields;
-using NullableReferenceTypesRewriter.Inheritance;
-using NullableReferenceTypesRewriter.LocalDeclaration;
-using NullableReferenceTypesRewriter.MethodArguments;
 using NullableReferenceTypesRewriter.MethodReturn;
-using NullableReferenceTypesRewriter.Properties;
 using NullableReferenceTypesRewriter.Utilities;
 
 namespace NullableReferenceTypesRewriter.ConsoleApplication
@@ -52,19 +45,16 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
 
       var graphBuilder = new MethodGraphBuilder();
 
-      IEnumerable<(Document, Document)> converted = ApplyConverter (
-          project.Documents,
-          new IDocumentConverter[]
-          {
-                new MethodReturnNullDocumentConverter(graphBuilder),
-          });
-
-       // converted = await new InheritanceProjectConverter().Convert (converted);
-
-      foreach (var (oldDocument, document) in converted)
+      foreach (var document in project.Documents)
       {
-        await WriteChanges (oldDocument, document);
+        var syntax = await document.GetSyntaxRootAsync()
+                     ?? throw new ArgumentException ($"Document '{document.FilePath}' does not support providing a syntax tree.");
+
+        graphBuilder.SetDocument (document);
+        graphBuilder.Visit (syntax);
       }
+
+      var graph = graphBuilder.Graph;
     }
 
     private static async Task WriteChanges (Document oldDocument, Document newDocument)

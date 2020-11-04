@@ -16,10 +16,16 @@ namespace NullableReferenceTypesRewriter.Analysis
     public IReadOnlyCollection<Dependency> Children => _children();
 
     public SyntaxNode RewritableSyntaxNode { get; private set; }
+    public Document Document { get; }
 
-    public Method (MethodDeclarationSyntax methodDeclaration, Func<IReadOnlyCollection<Dependency>> parents, Func<IReadOnlyCollection<Dependency>> children)
+    public Method (
+        MethodDeclarationSyntax methodDeclaration,
+        Document document,
+        Func<IReadOnlyCollection<Dependency>> parents,
+        Func<IReadOnlyCollection<Dependency>> children)
     {
       RewritableSyntaxNode = methodDeclaration;
+      Document = document;
       _methodSyntaxReference = methodDeclaration.GetReference();
       _parents = parents;
       _children = children;
