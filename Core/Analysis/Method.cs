@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace NullableReferenceTypesRewriter.Analysis
@@ -26,12 +25,11 @@ namespace NullableReferenceTypesRewriter.Analysis
       _children = children;
     }
 
-    public void Rewrite (CSharpSyntaxRewriter rewriter)
-    {
-      RewritableSyntaxNode = (MethodDeclarationSyntax) (rewriter.VisitMethodDeclaration ((MethodDeclarationSyntax) RewritableSyntaxNode)
-                                              ?? throw new InvalidOperationException ($"Could not rewrite {_methodSyntaxReference.GetSyntax()}."));
-    }
-
     public void Accept (MemberGraphVisitorBase visitor) => visitor.VisitMethod(this);
+
+    public void Rewrite (RewriterBase rewriter)
+    {
+      RewritableSyntaxNode = rewriter.Rewrite (this);
+    }
   }
 }
