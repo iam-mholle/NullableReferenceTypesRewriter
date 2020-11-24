@@ -9,17 +9,15 @@ namespace NullableReferenceTypesRewriter.Analysis
 {
   public class NullReturnRewriter : RewriterBase
   {
-    private readonly SemanticModel _semanticModel;
-
-    public NullReturnRewriter (Action<RewriterBase, IReadOnlyCollection<Dependency>> additionalRewrites, SemanticModel semanticModel)
+    public NullReturnRewriter (Action<RewriterBase, IReadOnlyCollection<Dependency>> additionalRewrites)
         : base(additionalRewrites)
     {
-      _semanticModel = semanticModel;
     }
 
     public override SyntaxNode? VisitMethodDeclaration (MethodDeclarationSyntax node)
     {
-      if (MayReturnNull(node, _semanticModel))
+      var semanticModel = _currentMethod.Document.GetSemanticModelAsync().GetAwaiter().GetResult();
+      if (MayReturnNull(node, semanticModel!))
       {
         return NullUtilities.ToNullReturning (node);
       }

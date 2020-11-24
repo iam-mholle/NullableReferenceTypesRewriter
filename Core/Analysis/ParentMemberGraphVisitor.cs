@@ -35,7 +35,21 @@ namespace NullableReferenceTypesRewriter.Analysis
     {
       foreach (var parent in node.Parents)
       {
+        if (parent.From is Method childMethod)
+        {
+          if (_visitedMethods.Contains(childMethod))
+          {
+            continue;
+          }
+          _visitedMethods.Push (childMethod);
+        }
+
         parent.From.Accept (this);
+
+        if (parent.From is Method)
+        {
+          _visitedMethods.Pop();
+        }
       }
     }
   }

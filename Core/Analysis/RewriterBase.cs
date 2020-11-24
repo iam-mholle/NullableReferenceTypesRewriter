@@ -10,6 +10,9 @@ namespace NullableReferenceTypesRewriter.Analysis
   {
     private readonly Action<RewriterBase, IReadOnlyCollection<Dependency>> _additionalRewrites;
 
+    protected Method _currentMethod = null!;
+    protected Field _currentField = null!;
+
     protected RewriterBase (Action<RewriterBase, IReadOnlyCollection<Dependency>> additionalRewrites)
     {
       _additionalRewrites = additionalRewrites;
@@ -17,6 +20,8 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     public SyntaxNode Rewrite (Field field)
     {
+      _currentField = field;
+
       var rewritten = VisitFieldDeclaration ((FieldDeclarationSyntax) field.RewritableSyntaxNode);
 
       if (rewritten == null)
@@ -32,6 +37,8 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     public SyntaxNode Rewrite (Method method)
     {
+      _currentMethod = method;
+
       var rewritten = VisitMethodDeclaration ((MethodDeclarationSyntax) method.RewritableSyntaxNode);
 
       if (rewritten == null)

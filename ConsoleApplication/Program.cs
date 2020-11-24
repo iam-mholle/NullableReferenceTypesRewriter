@@ -55,6 +55,13 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
       }
 
       var graph = graphBuilder.Graph;
+
+      var visitor = new TestVisitor();
+
+      foreach (var node in graph.GetNodesWithoutChildren())
+      {
+        node.Accept (visitor);
+      }
     }
 
     private static async Task WriteChanges (Document oldDocument, Document newDocument)
@@ -85,7 +92,7 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
       if (compilationOptions != null)
         project = project.WithCompilationOptions (compilationOptions);
 
-      return project;
+      return project.Com;
     }
 
     private static (Document, Document)[] ApplyConverter (IEnumerable<Document> documents, IEnumerable<IDocumentConverter> converters)

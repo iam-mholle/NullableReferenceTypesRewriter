@@ -9,19 +9,24 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     public override void VisitMethod (Method method)
     {
-      if (_visitedMethods.Contains(method))
-      {
-        return;
-      }
-
-      _visitedMethods.Push (method);
-
       foreach (var child in method.Children)
       {
-        child.To.Accept (this);
-      }
+        if (child.To is Method childMethod)
+        {
+          if (_visitedMethods.Contains(childMethod))
+          {
+            continue;
+          }
+          _visitedMethods.Push (childMethod);
+        }
 
-      _visitedMethods.Pop();
+        child.To.Accept (this);
+
+        if (child.To is Method)
+        {
+          _visitedMethods.Pop();
+        }
+      }
     }
 
     public override void VisitExternalMethod (ExternalMethod externalMethod)
