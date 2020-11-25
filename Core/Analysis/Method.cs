@@ -38,7 +38,19 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     public void Rewrite (RewriterBase rewriter)
     {
-      // RewritableSyntaxNode = rewriter.Rewrite (this);
+      var originalMethodDeclaration = MethodDeclaration;
+      var originalTree = originalMethodDeclaration.SyntaxTree;
+
+      var possiblyRewrittenNode = rewriter.Rewrite (this);
+
+      if (originalMethodDeclaration == possiblyRewrittenNode)
+        return;
+
+      var newRoot = originalTree.GetRoot().ReplaceNode (originalMethodDeclaration, possiblyRewrittenNode);
+
+      var newTree = originalTree.WithRootAndOptions (newRoot, originalTree.Options);
+
+      _compilation.UpdateSyntaxTree (originalTree, newTree);
     }
   }
 }

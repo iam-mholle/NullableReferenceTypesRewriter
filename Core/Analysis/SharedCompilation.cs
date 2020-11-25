@@ -26,6 +26,7 @@ namespace NullableReferenceTypesRewriter.Analysis
     public void UpdateSyntaxTree(SyntaxTree old, SyntaxTree @new)
     {
       _compilation = _compilation.ReplaceSyntaxTree(old, @new);
+      UpdateCompilation();
     }
 
     public SemanticModel GetSemanticModel (SyntaxTree tree)
