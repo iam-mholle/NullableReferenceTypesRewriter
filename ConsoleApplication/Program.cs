@@ -22,7 +22,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.MSBuild;
 using NullableReferenceTypesRewriter.Analysis;
-using NullableReferenceTypesRewriter.MethodReturn;
 using NullableReferenceTypesRewriter.Utilities;
 
 namespace NullableReferenceTypesRewriter.ConsoleApplication
@@ -42,8 +41,10 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
 
       var solution = await LoadSolutionSpace (solutionPath);
       var project = LoadProject (solution, projectName);
+      var compilation = project.GetCompilationAsync().GetAwaiter().GetResult();
+      var sharedCompilation = new SharedCompilation (compilation!);
 
-      var graphBuilder = new MethodGraphBuilder();
+      var graphBuilder = new MethodGraphBuilder(sharedCompilation);
 
       foreach (var document in project.Documents)
       {
@@ -92,7 +93,7 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
       if (compilationOptions != null)
         project = project.WithCompilationOptions (compilationOptions);
 
-      return project.Com;
+      return project;
     }
 
     private static (Document, Document)[] ApplyConverter (IEnumerable<Document> documents, IEnumerable<IDocumentConverter> converters)

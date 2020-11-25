@@ -8,19 +8,25 @@ namespace NullableReferenceTypesRewriter.Analysis
 {
   public class MethodGraph : IMethodGraph
   {
+    private readonly SharedCompilation _compilation;
     private readonly Dictionary<string, INode> _members = new Dictionary<string, INode>();
     private readonly Dictionary<string, List<Dependency>> _byFrom = new Dictionary<string, List<Dependency>>();
     private readonly Dictionary<string, List<Dependency>> _byTo = new Dictionary<string, List<Dependency>>();
 
-    public void AddMethod (string methodSymbol, MethodDeclarationSyntax methodDeclarationSyntax, Document document)
+    public MethodGraph (SharedCompilation compilation)
+    {
+      _compilation = compilation;
+    }
+
+    public void AddMethod (string uniqueName, IMethodSymbol methodSymbol)
     {
       var method = new Method (
-          methodDeclarationSyntax,
-          document,
-          CreateParentGetter (methodSymbol),
-          CreateChildrenGetter (methodSymbol));
+          _compilation,
+          methodSymbol,
+          CreateParentGetter (uniqueName),
+          CreateChildrenGetter (uniqueName));
 
-      _members[methodSymbol] = method;
+      _members[uniqueName] = method;
     }
 
     public void AddExternalMethod (string uniqueName, IMethodSymbol methodSymbol)

@@ -33,9 +33,10 @@ namespace NullableReferenceTypesRewriter.Utilities
     public static bool ReturnsNull (IEnumerable<StatementSyntax> statements, SemanticModel semanticModel)
     {
       var statementSyntaxes = statements as StatementSyntax[] ?? statements.ToArray();
+      var statementSyntaxesWithoutLocalFunctions = statementSyntaxes.Where (s => !(s is LocalFunctionStatementSyntax)).ToArray();
       var returnStatements = semanticModel.AnalyzeControlFlow (
-              statementSyntaxes.First(),
-              statementSyntaxes.Last())
+              statementSyntaxesWithoutLocalFunctions.First(),
+              statementSyntaxesWithoutLocalFunctions.Last())
           .ReturnStatements;
 
       return returnStatements.Any (

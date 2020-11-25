@@ -12,9 +12,9 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     public IMethodGraph Graph => _graph;
 
-    public MethodGraphBuilder()
+    public MethodGraphBuilder(SharedCompilation compilation)
     {
-      _graph = new MethodGraph();
+      _graph = new MethodGraph(compilation);
     }
 
     public void SetDocument (Document document)
@@ -26,7 +26,7 @@ namespace NullableReferenceTypesRewriter.Analysis
     public override void VisitMethodDeclaration (MethodDeclarationSyntax node)
     {
       var symbol = _semanticModel.GetDeclaredSymbol (node);
-      _graph.AddMethod(UniqueSymbolNameGenerator.Generate(symbol), node, _document!);
+      _graph.AddMethod(UniqueSymbolNameGenerator.Generate(symbol), symbol);
 
       base.VisitMethodDeclaration (node);
     }

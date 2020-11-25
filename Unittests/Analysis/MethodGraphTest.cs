@@ -1,4 +1,5 @@
 using System.Linq;
+using Microsoft.CodeAnalysis;
 using NullableReferenceTypesRewriter.Analysis;
 using NUnit.Framework;
 
@@ -7,6 +8,13 @@ namespace NullableReferenceTypesRewriter.UnitTests.Analysis
   [TestFixture]
   public class MethodGraphTest
   {
+    public MethodGraphTest (Compilation? compilation1)
+    {
+      _compilation = compilation1;
+    }
+
+    private Compilation? _compilation;
+
     [Test]
     public void Test ()
     {
@@ -26,7 +34,7 @@ public class B
   }
 }
 ");
-      var builder = new MethodGraphBuilder();
+      var builder = new MethodGraphBuilder(_compilation);
 
       // builder.SetSemanticModel (compilation.Item1);
       builder.Visit (compilation.Item2);
