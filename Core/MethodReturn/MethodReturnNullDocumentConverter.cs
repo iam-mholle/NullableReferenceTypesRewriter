@@ -35,7 +35,6 @@ namespace NullableReferenceTypesRewriter.MethodReturn
                    ?? throw new ArgumentException ($"Document '{document.FilePath}' does not support providing a syntax tree.");
 
       // _graphBuilder.SetSemanticModel (semantic);
-      _graphBuilder.SetDocument (document);
       // var newSyntax = new MethodReturnNullAnnotator (semantic).Visit (syntax);
       _graphBuilder.Visit(syntax);
       return document.WithSyntaxRoot (syntax);

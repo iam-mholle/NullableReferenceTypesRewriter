@@ -8,13 +8,6 @@ namespace NullableReferenceTypesRewriter.UnitTests.Analysis
   [TestFixture]
   public class MethodGraphTest
   {
-    public MethodGraphTest (Compilation? compilation1)
-    {
-      _compilation = compilation1;
-    }
-
-    private Compilation? _compilation;
-
     [Test]
     public void Test ()
     {
@@ -34,7 +27,7 @@ public class B
   }
 }
 ");
-      var builder = new MethodGraphBuilder(_compilation);
+      var builder = new MethodGraphBuilder(new SharedCompilation(compilation.Item1.Compilation));
 
       // builder.SetSemanticModel (compilation.Item1);
       builder.Visit (compilation.Item2);

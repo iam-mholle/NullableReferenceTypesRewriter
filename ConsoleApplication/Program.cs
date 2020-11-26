@@ -51,7 +51,6 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
         var syntax = await document.GetSyntaxRootAsync()
                      ?? throw new ArgumentException ($"Document '{document.FilePath}' does not support providing a syntax tree.");
 
-        graphBuilder.SetDocument (document);
         graphBuilder.Visit (syntax);
       }
 

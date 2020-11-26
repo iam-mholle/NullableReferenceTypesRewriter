@@ -16,20 +16,20 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     public override void VisitMethod (Method method)
     {
-      Console.WriteLine ("method: " + method.MethodDeclaration.ToString());
+      // Console.WriteLine ("method: " + method.MethodDeclaration.ToString());
       method.Rewrite (_nullReturnRewriter);
       base.VisitMethod (method);
     }
 
     public override void VisitField (Field field)
     {
-      Console.WriteLine ("field: " + field.FieldDeclarationSyntax.ToString());
+      // Console.WriteLine ("field: " + field.FieldDeclarationSyntax.ToString());
       base.VisitField (field);
     }
 
     public override void VisitExternalMethod (ExternalMethod externalMethod)
     {
-      Console.WriteLine ("external: " + externalMethod.Symbol.ToString());
+      // Console.WriteLine ("external: " + externalMethod.Symbol.ToString());
       base.VisitExternalMethod (externalMethod);
     }
   }

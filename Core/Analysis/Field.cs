@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -7,19 +8,23 @@ namespace NullableReferenceTypesRewriter.Analysis
 {
   public class Field : INode, IRewritable
   {
-    private readonly SyntaxReference _fieldSyntaxReference;
+    private readonly string _signature;
+    private readonly string _filePath;
+    private readonly SharedCompilation _compilation;
     private readonly Func<IReadOnlyCollection<Dependency>> _parents;
 
     public IReadOnlyCollection<Dependency> Parents => _parents();
     public IReadOnlyCollection<Dependency> Children { get; } = new Dependency[0];
 
-    public FieldDeclarationSyntax FieldDeclarationSyntax => (FieldDeclarationSyntax) _fieldSyntaxReference.GetSyntax();
-    public SyntaxNode RewritableSyntaxNode { get; private set; }
+    public FieldDeclarationSyntax FieldDeclarationSyntax => _compilation.GetFieldDeclarationSyntax(_filePath, _signature);
+    public SyntaxNode RewritableSyntaxNode => FieldDeclarationSyntax;
+    public SemanticModel SemanticModel => _compilation.GetSemanticModel (_filePath);
 
-    public Field (FieldDeclarationSyntax fieldDeclarationSyntax, Func<IReadOnlyCollection<Dependency>> parents)
+    public Field (SharedCompilation compilation, IFieldSymbol fieldSymbol, Func<IReadOnlyCollection<Dependency>> parents)
     {
-      RewritableSyntaxNode = fieldDeclarationSyntax;
-      _fieldSyntaxReference = fieldDeclarationSyntax.GetReference();
+      _filePath = fieldSymbol.DeclaringSyntaxReferences.Single().SyntaxTree.FilePath;
+      _signature = fieldSymbol.ToDisplayString();
+      _compilation = compilation;
       _parents = parents;
     }
 
@@ -27,7 +32,19 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     public void Rewrite (RewriterBase rewriter)
     {
-      RewritableSyntaxNode = rewriter.Rewrite (this);
+      var originalFieldDeclaration = FieldDeclarationSyntax;
+      var originalTree = originalFieldDeclaration.SyntaxTree;
+
+      var possiblyRewrittenNode = rewriter.Rewrite (this);
+
+      if (originalFieldDeclaration == possiblyRewrittenNode)
+        return;
+
+      var newRoot = originalTree.GetRoot().ReplaceNode (originalFieldDeclaration, possiblyRewrittenNode);
+
+      var newTree = originalTree.WithRootAndOptions (newRoot, originalTree.Options);
+
+      _compilation.UpdateSyntaxTree (originalTree, newTree);
     }
   }
 }

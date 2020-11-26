@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -25,6 +26,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     public void UpdateSyntaxTree(SyntaxTree old, SyntaxTree @new)
     {
+      Console.WriteLine ($"Updated syntaxtree of {old.FilePath}");
       _compilation = _compilation.ReplaceSyntaxTree(old, @new);
       UpdateCompilation();
     }
@@ -49,8 +51,26 @@ namespace NullableReferenceTypesRewriter.Analysis
                   t.GetRoot()
                       .DescendantNodes (_ => true)
                       .OfType<MethodDeclarationSyntax>()
-                      .Where (n => _compilation.GetSemanticModel (t).GetDeclaredSymbol (n).ToDisplayString() == signature))
+                      .Where (n => NullabilityTrimmingEquals(_compilation.GetSemanticModel (t).GetDeclaredSymbol (n).ToDisplayString(),signature)))
           .Single();
+    }
+
+    public FieldDeclarationSyntax GetFieldDeclarationSyntax (string filePath, string signature)
+    {
+      return _compilation.SyntaxTrees
+          .Where (t => t.FilePath == filePath)
+          .SelectMany (
+              t =>
+                  t.GetRoot()
+                      .DescendantNodes (_ => true)
+                      .OfType<FieldDeclarationSyntax>()
+                      .Where (n => NullabilityTrimmingEquals(_compilation.GetSemanticModel (t).GetDeclaredSymbol (n).ToDisplayString(),signature)))
+          .Single();
+    }
+
+    private static bool NullabilityTrimmingEquals (string a, string b)
+    {
+      return a.Replace ("?", "") == b.Replace ("?", "");
     }
   }
 }

@@ -36,9 +36,9 @@ namespace NullableReferenceTypesRewriter.Analysis
       _members[uniqueName] = method;
     }
 
-    public void AddField (string uniqueName, FieldDeclarationSyntax fieldDeclarationSyntax)
+    public void AddField (string uniqueName, IFieldSymbol fieldSymbol)
     {
-      var field = new Field (fieldDeclarationSyntax, CreateParentGetter (uniqueName));
+      var field = new Field (_compilation, fieldSymbol, CreateParentGetter (uniqueName));
 
       _members[uniqueName] = field;
     }
