@@ -1,5 +1,7 @@
 using System;
+using System.IO;
 using System.Linq;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -13,6 +15,23 @@ namespace NullableReferenceTypesRewriter.Analysis
     public SharedCompilation (Compilation compilation)
     {
       _compilation = compilation;
+    }
+
+    public void WriteChanges ()
+    {
+      foreach (var syntaxTree in _compilation.SyntaxTrees)
+      {
+        try
+        {
+          using var fileStream = new FileStream (syntaxTree.FilePath!, FileMode.Truncate);
+          using var writer = new StreamWriter (fileStream, syntaxTree.Encoding);
+          syntaxTree.GetRoot()!.WriteTo (writer);
+        }
+        catch (IOException ex)
+        {
+          throw new InvalidOperationException ($"Unable to write source file '{syntaxTree.FilePath}'.", ex);
+        }
+      }
     }
 
     public void UpdateCompilation ()

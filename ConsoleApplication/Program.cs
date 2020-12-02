@@ -12,17 +12,13 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.MSBuild;
 using NullableReferenceTypesRewriter.Analysis;
-using NullableReferenceTypesRewriter.Utilities;
 
 namespace NullableReferenceTypesRewriter.ConsoleApplication
 {
@@ -62,25 +58,8 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
       {
         node.Accept (visitor);
       }
-    }
 
-    private static async Task WriteChanges (Document oldDocument, Document newDocument)
-    {
-      try
-      {
-        var newRootNode = await newDocument.GetSyntaxRootAsync();
-        var oldRootNode = await oldDocument.GetSyntaxRootAsync();
-
-        if (oldRootNode == newRootNode) return;
-
-        using var fileStream = new FileStream (newDocument.FilePath!, FileMode.Truncate);
-        using var writer = new StreamWriter (fileStream, Encoding.Default);
-        newRootNode!.WriteTo (writer);
-      }
-      catch (IOException ex)
-      {
-        throw new InvalidOperationException ($"Unable to write source file '{newDocument.FilePath}'.", ex);
-      }
+      sharedCompilation.WriteChanges();
     }
 
     private static Project LoadProject (Solution solution, string projectName)
@@ -93,11 +72,6 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
         project = project.WithCompilationOptions (compilationOptions);
 
       return project;
-    }
-
-    private static (Document, Document)[] ApplyConverter (IEnumerable<Document> documents, IEnumerable<IDocumentConverter> converters)
-    {
-      return documents.Select (doc => (doc, ConverterUtilities.ApplyAll (doc, converters).GetAwaiter().GetResult())).ToArray();
     }
 
     private static Task<Solution> LoadSolutionSpace (string solutionPath)
