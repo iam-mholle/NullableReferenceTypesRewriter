@@ -25,6 +25,11 @@ namespace NullableReferenceTypesRewriter.Analysis
       return node;
     }
 
+    protected override IReadOnlyCollection<Dependency> GetAdditionalRewrites (Method method)
+    {
+      return method.Parents;
+    }
+
     private static bool MayReturnNull (MethodDeclarationSyntax node, SemanticModel model)
     {
       return !(NullUtilities.ReturnsVoid (node)

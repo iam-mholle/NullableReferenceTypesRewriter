@@ -11,7 +11,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     public TestVisitor ()
     {
-      _nullReturnRewriter = new NullReturnRewriter((rewriter, collection) => { });
+      _nullReturnRewriter = new NullReturnRewriter((rewriter, collection) => _queue.Add((rewriter, collection)));
     }
 
     public override void VisitMethod (Method method)
