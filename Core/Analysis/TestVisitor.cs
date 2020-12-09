@@ -6,12 +6,11 @@ namespace NullableReferenceTypesRewriter.Analysis
 {
   public class TestVisitor : ParentMemberGraphVisitor
   {
-    private readonly List<(RewriterBase, IReadOnlyCollection<Dependency>)> _queue = new List<(RewriterBase, IReadOnlyCollection<Dependency>)>();
     private RewriterBase _nullReturnRewriter;
 
-    public TestVisitor ()
+    public TestVisitor (Action<RewriterBase, IReadOnlyCollection<Dependency>> additionalRewrites)
     {
-      _nullReturnRewriter = new NullReturnRewriter((rewriter, collection) => _queue.Add((rewriter, collection)));
+      _nullReturnRewriter = new NullReturnRewriter(additionalRewrites);
     }
 
     public override void VisitMethod (Method method)

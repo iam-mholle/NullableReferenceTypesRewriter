@@ -12,6 +12,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Build.Locator;
@@ -51,8 +52,8 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
       }
 
       var graph = graphBuilder.Graph;
-
-      var visitor = new TestVisitor();
+      var queue = new List<(RewriterBase, IReadOnlyCollection<Dependency>)>();
+      var visitor = new TestVisitor((rewriter, collection) => queue.Add((rewriter, collection)));
 
       foreach (var node in graph.GetNodesWithoutChildren())
       {

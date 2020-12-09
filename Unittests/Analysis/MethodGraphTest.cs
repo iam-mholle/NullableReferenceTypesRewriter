@@ -43,5 +43,26 @@ public class B
       Assert.That (methodOfA.Children.First().To, Is.SameAs(methodOfB));
       Assert.That (methodOfB.Parents.First().From, Is.SameAs(methodOfA));
     }
+
+    [Test]
+    public void Test_1 ()
+    {
+      var compilation = CompiledSourceFileProvider.CompileInNameSpace ("Test", @"
+public class A
+{
+  private string _field = string.Empty;
+
+  public string DoStuff()
+  {
+    return _field;
+  }
+}
+");
+      var builder = new MethodGraphBuilder(new SharedCompilation(compilation.Item1.Compilation));
+
+      // builder.SetSemanticModel (compilation.Item1);
+      builder.Visit (compilation.Item2);
+      var methodOfA = builder.Graph.GetNode ("Test.A.DoStuff()");
+    }
   }
 }

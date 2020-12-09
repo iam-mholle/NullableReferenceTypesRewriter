@@ -52,6 +52,25 @@ namespace NullableReferenceTypesRewriter.Analysis
       base.VisitInvocationExpression (node);
     }
 
+    public override void VisitIdentifierName (IdentifierNameSyntax node)
+    {
+      var containingMethodDeclaration = node.FirstAncestorOrSelf<MethodDeclarationSyntax>();
+
+      if (containingMethodDeclaration != null)
+      {
+        var containingMethodSymbol = GetSemanticModel(node).GetDeclaredSymbol (containingMethodDeclaration);
+        var symbolInfoCandidate = GetSemanticModel (node).GetSymbolInfo (node);
+        if (symbolInfoCandidate.Symbol is IFieldSymbol fieldSymbol)
+        {
+          _graph.AddDependency(
+              UniqueSymbolNameGenerator.Generate(containingMethodSymbol),
+              UniqueSymbolNameGenerator.Generate(fieldSymbol));
+        }
+      }
+
+      base.VisitIdentifierName (node);
+    }
+
     public override void VisitFieldDeclaration (FieldDeclarationSyntax node)
     {
       foreach (var declaredField in node.Declaration.Variables)
