@@ -74,7 +74,7 @@ namespace NullableReferenceTypesRewriter.Analysis
           .Single();
     }
 
-    public FieldDeclarationSyntax GetFieldDeclarationSyntax (string filePath, string signature)
+    public FieldDeclarationSyntax GetVariableDeclarationSyntax (string filePath, string signature)
     {
       return _compilation.SyntaxTrees
           .Where (t => t.FilePath == filePath)
@@ -82,9 +82,10 @@ namespace NullableReferenceTypesRewriter.Analysis
               t =>
                   t.GetRoot()
                       .DescendantNodes (_ => true)
-                      .OfType<FieldDeclarationSyntax>()
+                      .OfType<VariableDeclaratorSyntax>()
+                      .Where (n => n.FirstAncestorOrSelf<FieldDeclarationSyntax>() != null)
                       .Where (n => NullabilityTrimmingEquals(_compilation.GetSemanticModel (t).GetDeclaredSymbol (n).ToDisplayString(),signature)))
-          .Single();
+          .Single().FirstAncestorOrSelf<FieldDeclarationSyntax>();
     }
 
     private static bool NullabilityTrimmingEquals (string a, string b)

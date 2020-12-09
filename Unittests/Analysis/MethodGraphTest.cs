@@ -63,6 +63,7 @@ public class A
       // builder.SetSemanticModel (compilation.Item1);
       builder.Visit (compilation.Item2);
       var methodOfA = builder.Graph.GetNode ("Test.A.DoStuff()");
+      var r = (methodOfA.Children.Single().To as Field)!.FieldDeclarationSyntax;
     }
   }
 }

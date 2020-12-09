@@ -16,7 +16,7 @@ namespace NullableReferenceTypesRewriter.Analysis
     public IReadOnlyCollection<Dependency> Parents => _parents();
     public IReadOnlyCollection<Dependency> Children { get; } = new Dependency[0];
 
-    public FieldDeclarationSyntax FieldDeclarationSyntax => _compilation.GetFieldDeclarationSyntax(_filePath, _signature);
+    public FieldDeclarationSyntax FieldDeclarationSyntax => _compilation.GetVariableDeclarationSyntax(_filePath, _signature);
     public SyntaxNode RewritableSyntaxNode => FieldDeclarationSyntax;
     public SemanticModel SemanticModel => _compilation.GetSemanticModel (_filePath);
 
