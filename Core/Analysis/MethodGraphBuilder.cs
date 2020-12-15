@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -22,7 +24,47 @@ namespace NullableReferenceTypesRewriter.Analysis
       var symbol = GetSemanticModel(node).GetDeclaredSymbol (node);
       _graph.AddMethod(UniqueSymbolNameGenerator.Generate(symbol), symbol);
 
+      if (TryGetInterfaceMethods(symbol, out var interfaceMethods))
+      {
+        foreach (var interfaceMethod in interfaceMethods)
+        {
+          _graph.AddDependency(
+              UniqueSymbolNameGenerator.Generate(interfaceMethod),
+              UniqueSymbolNameGenerator.Generate(symbol));
+        }
+      }
+
+      if (TryGetOverriddenMethod(symbol, out var overriddenMethod))
+      {
+        _graph.AddDependency (
+            UniqueSymbolNameGenerator.Generate (overriddenMethod!),
+            UniqueSymbolNameGenerator.Generate (symbol));
+      }
+
       base.VisitMethodDeclaration (node);
+    }
+
+    private bool TryGetInterfaceMethods(IMethodSymbol method, out IReadOnlyCollection<IMethodSymbol> interfaceMethods)
+    {
+      var methodsOfContainingType = method.ContainingType.AllInterfaces;
+      interfaceMethods = methodsOfContainingType
+          .SelectMany(@interface => @interface.GetMembers().OfType<IMethodSymbol>())
+          .Where(interfaceMethod => SymbolEqualityComparer.Default.Equals(method.ContainingType.FindImplementationForInterfaceMember(interfaceMethod), method))
+          .ToArray();
+
+      return interfaceMethods.Any();
+    }
+
+    private bool TryGetOverriddenMethod (IMethodSymbol method, out IMethodSymbol? overriddenMethod)
+    {
+      if (method.IsOverride)
+      {
+        overriddenMethod = method.OverriddenMethod;
+        return true;
+      }
+
+      overriddenMethod = null;
+      return false;
     }
 
     private SemanticModel GetSemanticModel (SyntaxNode node)
