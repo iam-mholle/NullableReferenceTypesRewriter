@@ -19,5 +19,10 @@ namespace NullableReferenceTypesRewriter.Analysis
     }
 
     public void Accept (MemberGraphVisitorBase visitor) => visitor.VisitExternalMethod (this);
+
+    public override string ToString ()
+    {
+      return Symbol.ToDisplayString();
+    }
   }
 }

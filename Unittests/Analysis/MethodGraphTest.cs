@@ -209,5 +209,51 @@ public class B : A
       Assert.That (baseMethod.Children.First().To, Is.SameAs (method));
       Assert.That (method.Parents.First().From, Is.SameAs (baseMethod));
     }
+
+    [Test]
+    public void Inheritance_OverriddenOverriddenMethod ()
+    {
+      var compilation = CompiledSourceFileProvider.CompileInNameSpace (
+          "Test",
+          //language=C#
+          @"
+public class A
+{
+  public abstract string DoStuff();
+}
+public class B : A
+{
+  public override string DoStuff()
+  {
+    return ""intermediate"";
+  }
+}
+public class C : B
+{
+  public override string DoStuff()
+  {
+    return Array.Empty<string>();
+  }
+}
+");
+      var builder = new MethodGraphBuilder (new SharedCompilation (compilation.Item1.Compilation));
+
+      builder.Visit (compilation.Item2);
+
+      var aMethod = builder.Graph.GetNode ("Test.A.DoStuff()");
+      var bMethod = builder.Graph.GetNode ("Test.B.DoStuff()");
+      var cMethod = builder.Graph.GetNode ("Test.C.DoStuff()");
+      Assert.That (aMethod, Is.Not.Null);
+      Assert.That (bMethod, Is.Not.Null);
+      Assert.That (cMethod, Is.Not.Null);
+      Assert.That (aMethod.Children, Has.One.Items);
+      Assert.That (bMethod.Parents, Has.One.Items);
+      Assert.That (bMethod.Children, Has.One.Items);
+      Assert.That (cMethod.Parents, Has.One.Items);
+      Assert.That (aMethod.Children.First().To, Is.SameAs (bMethod));
+      Assert.That (bMethod.Parents.First().From, Is.SameAs (aMethod));
+      Assert.That (bMethod.Children.First().To, Is.SameAs (cMethod));
+      Assert.That (cMethod.Parents.First().From, Is.SameAs (bMethod));
+    }
   }
 }

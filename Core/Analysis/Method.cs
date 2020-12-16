@@ -52,5 +52,10 @@ namespace NullableReferenceTypesRewriter.Analysis
 
       _compilation.UpdateSyntaxTree (originalTree, newTree);
     }
+
+    public override string ToString ()
+    {
+      return _signature;
+    }
   }
 }
