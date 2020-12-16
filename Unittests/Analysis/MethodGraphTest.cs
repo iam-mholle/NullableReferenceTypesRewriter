@@ -255,5 +255,41 @@ public class C : B
       Assert.That (bMethod.Children.First().To, Is.SameAs (cMethod));
       Assert.That (cMethod.Parents.First().From, Is.SameAs (bMethod));
     }
+
+    [Test]
+    public void Inheritance_OverriddenVirtualMethod ()
+    {
+      var compilation = CompiledSourceFileProvider.CompileInNameSpace (
+          "Test",
+          //language=C#
+          @"
+public class A
+{
+  public virtual string DoStuff()
+  {
+    return ""test"";
+  }
+}
+public class B : A
+{
+  public override string DoStuff()
+  {
+    return Array.Empty<string>();
+  }
+}
+");
+      var builder = new MethodGraphBuilder (new SharedCompilation (compilation.Item1.Compilation));
+
+      builder.Visit (compilation.Item2);
+
+      var baseMethod = builder.Graph.GetNode ("Test.A.DoStuff()");
+      var method = builder.Graph.GetNode ("Test.B.DoStuff()");
+      Assert.That (baseMethod, Is.Not.Null);
+      Assert.That (method, Is.Not.Null);
+      Assert.That (baseMethod.Children, Has.One.Items);
+      Assert.That (method.Parents, Has.One.Items);
+      Assert.That (baseMethod.Children.First().To, Is.SameAs (method));
+      Assert.That (method.Parents.First().From, Is.SameAs (baseMethod));
+    }
   }
 }
