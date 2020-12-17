@@ -8,12 +8,12 @@ namespace NullableReferenceTypesRewriter.Analysis
 {
   public abstract class RewriterBase : CSharpSyntaxRewriter
   {
-    private readonly Action<RewriterBase, IReadOnlyCollection<Dependency>> _additionalRewrites;
+    private readonly Action<RewriterBase, IReadOnlyCollection<IRewritable>> _additionalRewrites;
 
     protected Method _currentMethod = null!;
     protected Field _currentField = null!;
 
-    protected RewriterBase (Action<RewriterBase, IReadOnlyCollection<Dependency>> additionalRewrites)
+    protected RewriterBase (Action<RewriterBase, IReadOnlyCollection<IRewritable>> additionalRewrites)
     {
       _additionalRewrites = additionalRewrites;
     }
@@ -52,14 +52,14 @@ namespace NullableReferenceTypesRewriter.Analysis
       return rewritten;
     }
 
-    protected virtual IReadOnlyCollection<Dependency> GetAdditionalRewrites (Field field)
+    protected virtual IReadOnlyCollection<IRewritable> GetAdditionalRewrites (Field field)
     {
-      return new Dependency[0];
+      return Array.Empty<IRewritable>();
     }
 
-    protected virtual IReadOnlyCollection<Dependency> GetAdditionalRewrites (Method method)
+    protected virtual IReadOnlyCollection<IRewritable> GetAdditionalRewrites (Method method)
     {
-      return new Dependency[0];
+      return Array.Empty<IRewritable>();
     }
   }
 }

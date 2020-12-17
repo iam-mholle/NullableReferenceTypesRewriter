@@ -52,7 +52,7 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
       }
 
       var graph = graphBuilder.Graph;
-      var queue = new List<(RewriterBase, IReadOnlyCollection<Dependency>)>();
+      var queue = new List<(RewriterBase, IReadOnlyCollection<IRewritable>)>();
       var visitor = new TestVisitor((rewriter, collection) => queue.Add((rewriter, collection)));
 
       foreach (var node in graph.GetNodesWithoutChildren())

@@ -1,4 +1,8 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NullableReferenceTypesRewriter.Analysis;
 using NUnit.Framework;
 
@@ -290,6 +294,60 @@ public class B : A
       Assert.That (method.Parents, Has.One.Items);
       Assert.That (baseMethod.Children.First().To, Is.SameAs (method));
       Assert.That (method.Parents.First().From, Is.SameAs (baseMethod));
+    }
+
+    [Test]
+    public void RewriterYieldingAdditionalRewrites ()
+    {
+      var compilation = CompiledSourceFileProvider.CompileInNameSpace (
+          "Test",
+          //language=C#
+          @"
+public class A
+{
+  public object DoStuff()
+  {
+    return new B().DoMore();
+  }
+}
+public class B
+{
+  public object DoMore()
+  {
+    return new C().DoMore();
+  }
+}
+public class C
+{
+  public object? DoMore()
+  {
+    return new object();
+  }
+}
+");
+      var builder = new MethodGraphBuilder (new SharedCompilation (compilation.Item1.Compilation));
+      builder.Visit (compilation.Item2);
+      var additionalRewrites = new List<IRewritable>();
+      var graph = builder.Graph;
+      var aMethod = (Method) graph.GetNode ("Test.A.DoStuff()");
+      var bMethod = (Method) graph.GetNode ("Test.B.DoMore()");
+      var rewriter = new RewriterYieldingParentMethodsAsAdditionalRewrites ((r, d) => additionalRewrites.AddRange(d));
+
+      bMethod.Rewrite (rewriter);
+
+      Assert.That (additionalRewrites, Has.One.Items.SameAs (aMethod));
+    }
+
+    private class RewriterYieldingParentMethodsAsAdditionalRewrites : RewriterBase
+    {
+      public RewriterYieldingParentMethodsAsAdditionalRewrites (Action<RewriterBase, IReadOnlyCollection<IRewritable>> additionalRewrites)
+          : base(additionalRewrites)
+      {
+      }
+
+      public override SyntaxNode? VisitMethodDeclaration (MethodDeclarationSyntax node) => node.WithLeadingTrivia (SyntaxTriviaList.Create (new SyntaxTrivia()));
+
+      protected override IReadOnlyCollection<IRewritable> GetAdditionalRewrites (Method method) => method.Parents.Select (p => p.From).OfType<IRewritable>().ToArray();
     }
   }
 }

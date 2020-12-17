@@ -9,7 +9,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 {
   public class NullReturnRewriter : RewriterBase
   {
-    public NullReturnRewriter (Action<RewriterBase, IReadOnlyCollection<Dependency>> additionalRewrites)
+    public NullReturnRewriter (Action<RewriterBase, IReadOnlyCollection<IRewritable>> additionalRewrites)
         : base(additionalRewrites)
     {
     }
@@ -25,9 +25,9 @@ namespace NullableReferenceTypesRewriter.Analysis
       return node;
     }
 
-    protected override IReadOnlyCollection<Dependency> GetAdditionalRewrites (Method method)
+    protected override IReadOnlyCollection<IRewritable> GetAdditionalRewrites (Method method)
     {
-      return method.Parents;
+      return method.Parents.Select (p => p.From).OfType<IRewritable>().ToArray();
     }
 
     private static bool MayReturnNull (MethodDeclarationSyntax node, SemanticModel model)

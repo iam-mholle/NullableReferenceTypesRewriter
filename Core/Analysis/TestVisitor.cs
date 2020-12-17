@@ -8,7 +8,7 @@ namespace NullableReferenceTypesRewriter.Analysis
   {
     private RewriterBase _nullReturnRewriter;
 
-    public TestVisitor (Action<RewriterBase, IReadOnlyCollection<Dependency>> additionalRewrites)
+    public TestVisitor (Action<RewriterBase, IReadOnlyCollection<IRewritable>> additionalRewrites)
     {
       _nullReturnRewriter = new NullReturnRewriter(additionalRewrites);
     }
