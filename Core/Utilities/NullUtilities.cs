@@ -37,9 +37,9 @@ namespace NullableReferenceTypesRewriter.Utilities
       var returnStatements = semanticModel.AnalyzeControlFlow (
               statementSyntaxesWithoutLocalFunctions.First(),
               statementSyntaxesWithoutLocalFunctions.Last())
-          .ReturnStatements;
+          ?.ReturnStatements;
 
-      return returnStatements.Any (
+      return returnStatements!.Value.Any (
           stmt => stmt is ReturnStatementSyntax returnStatement
                   && CanBeNull (returnStatement.Expression!, semanticModel));
     }

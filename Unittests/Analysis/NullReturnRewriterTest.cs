@@ -351,7 +351,7 @@ public object DoStuff<T>(T obj)
     {
       return new Method(
           new SharedCompilation(semanticModel.Compilation),
-          semanticModel.GetDeclaredSymbol(syntax),
+          semanticModel.GetDeclaredSymbol(syntax)!,
           parents ?? Array.Empty<Dependency>,
           children ?? Array.Empty<Dependency>);
     }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -22,6 +23,9 @@ namespace NullableReferenceTypesRewriter.Analysis
     public override void VisitMethodDeclaration (MethodDeclarationSyntax node)
     {
       var symbol = GetSemanticModel(node).GetDeclaredSymbol (node);
+
+      if (symbol == null) throw new InvalidOperationException();
+
       _graph.AddMethod(UniqueSymbolNameGenerator.Generate(symbol), symbol);
 
       if (TryGetInterfaceMethods(symbol, out var interfaceMethods))
@@ -81,6 +85,8 @@ namespace NullableReferenceTypesRewriter.Analysis
       {
         var containingMethodSymbol = GetSemanticModel(node).GetDeclaredSymbol (containingMethodDeclaration);
 
+        if (containingMethodSymbol == null) throw new InvalidOperationException();
+
         if (invokedMethodSymbol.DeclaringSyntaxReferences.IsEmpty)
         {
           _graph.AddExternalMethod (UniqueSymbolNameGenerator.Generate (invokedMethodSymbol), invokedMethodSymbol);
@@ -101,6 +107,9 @@ namespace NullableReferenceTypesRewriter.Analysis
       if (containingMethodDeclaration != null)
       {
         var containingMethodSymbol = GetSemanticModel(node).GetDeclaredSymbol (containingMethodDeclaration);
+
+        if (containingMethodSymbol == null) throw new InvalidOperationException();
+
         var symbolInfoCandidate = GetSemanticModel (node).GetSymbolInfo (node);
         if (symbolInfoCandidate.Symbol is IFieldSymbol fieldSymbol)
         {
@@ -117,7 +126,10 @@ namespace NullableReferenceTypesRewriter.Analysis
     {
       foreach (var declaredField in node.Declaration.Variables)
       {
-        var symbol = (IFieldSymbol) GetSemanticModel(node).GetDeclaredSymbol (declaredField);
+        var symbol = (IFieldSymbol?) GetSemanticModel(node).GetDeclaredSymbol (declaredField);
+
+        if (symbol == null) throw new InvalidOperationException();
+
         // TODO: Do I want to pass in node here?
         _graph.AddField (UniqueSymbolNameGenerator.Generate (symbol), symbol);
       }

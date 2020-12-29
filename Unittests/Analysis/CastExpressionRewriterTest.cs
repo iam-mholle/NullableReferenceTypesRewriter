@@ -84,7 +84,7 @@ public string? GetNullableString()
     {
       return new Method(
           new SharedCompilation(semanticModel.Compilation),
-          semanticModel.GetDeclaredSymbol(syntax),
+          semanticModel.GetDeclaredSymbol(syntax)!,
           parents ?? Array.Empty<Dependency>,
           children ?? Array.Empty<Dependency>);
     }

@@ -38,7 +38,9 @@ namespace NullableReferenceTypesRewriter.Inheritance
 
     public override SyntaxNode? VisitMethodDeclaration (MethodDeclarationSyntax node)
     {
-      var symbol = (IMethodSymbol) _semanticModel.GetDeclaredSymbol (node);
+      var symbol = _semanticModel.GetDeclaredSymbol (node);
+
+      if (symbol == null) throw new InvalidOperationException();
 
       var implementations = SymbolFinder.FindImplementationsAsync (symbol, _document.Project.Solution).GetAwaiter().GetResult().Cast<IMethodSymbol>().ToArray();
 
@@ -72,7 +74,7 @@ namespace NullableReferenceTypesRewriter.Inheritance
                 set.Add (nullableParameter.Name);
               return set;
             });
-        yield return (interfaceMethod.DeclaringSyntaxReferences.FirstOrDefault(), nullableImplementationParameters.ToArray());
+        yield return (interfaceMethod.DeclaringSyntaxReferences.FirstOrDefault()!, nullableImplementationParameters.ToArray());
       }
     }
 
@@ -91,7 +93,7 @@ namespace NullableReferenceTypesRewriter.Inheritance
         var implementationReferences = implementations.Select (impl => impl.DeclaringSyntaxReferences.FirstOrDefault()).ToArray();
 
         foreach (var implementationReference in implementationReferences)
-          list.Add ((implementationReference, nullableParameterNames));
+          list.Add ((implementationReference!, nullableParameterNames));
       }
 
       return list;

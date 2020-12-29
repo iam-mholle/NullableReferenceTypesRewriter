@@ -70,7 +70,7 @@ namespace NullableReferenceTypesRewriter.Analysis
                   t.GetRoot()
                       .DescendantNodes (_ => true)
                       .OfType<MethodDeclarationSyntax>()
-                      .Where (n => NullabilityTrimmingEquals(_compilation.GetSemanticModel (t).GetDeclaredSymbol (n).ToDisplayString(),signature)))
+                      .Where (n => NullabilityTrimmingEquals(_compilation.GetSemanticModel (t).GetDeclaredSymbol (n)!.ToDisplayString(),signature)))
           .Single();
     }
 
@@ -84,8 +84,8 @@ namespace NullableReferenceTypesRewriter.Analysis
                       .DescendantNodes (_ => true)
                       .OfType<VariableDeclaratorSyntax>()
                       .Where (n => n.FirstAncestorOrSelf<FieldDeclarationSyntax>() != null)
-                      .Where (n => NullabilityTrimmingEquals(_compilation.GetSemanticModel (t).GetDeclaredSymbol (n).ToDisplayString(),signature)))
-          .Single().FirstAncestorOrSelf<FieldDeclarationSyntax>();
+                      .Where (n => NullabilityTrimmingEquals(_compilation.GetSemanticModel (t).GetDeclaredSymbol (n)!.ToDisplayString(),signature)))
+          .Single().FirstAncestorOrSelf<FieldDeclarationSyntax>()!;
     }
 
     private static bool NullabilityTrimmingEquals (string a, string b)

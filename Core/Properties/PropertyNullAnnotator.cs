@@ -65,7 +65,7 @@ namespace NullableReferenceTypesRewriter.Properties
     private bool GetterReturnsNull (PropertyDeclarationSyntax node)
     {
       var propertySymbol = _semanticModel.GetDeclaredSymbol (node);
-      if (propertySymbol.GetMethod == null)
+      if (propertySymbol?.GetMethod == null)
       {
         return false;
       }
