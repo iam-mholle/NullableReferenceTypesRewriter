@@ -310,6 +310,81 @@ private string test = string.Empty, test2;
       Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
     }
 
+    [Test]
+    public void InitializedInCtorChain_SecondCtorToNotNull_Unchanged ()
+    {
+      //language=C#
+      const string expected = @"
+private string test;
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
+          "A",
+          //language=C#
+          @"
+private string test;
+
+public A() : this(true) { }
+public A(bool _) { test = string.Empty; }
+");
+      var syntax = (FieldDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.FieldDeclaration));
+      var field = CreateFieldWrapper (syntax, semantic);
+      var sut = new UninitializedFieldRewriter((b, c) => { });
+
+      var result = sut.Rewrite (field);
+
+      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+    }
+
+    [Test]
+    public void InitializedInCtorChain_BothCtorToNotNull_Unchanged ()
+    {
+      //language=C#
+      const string expected = @"
+private string test;
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
+          "A",
+          //language=C#
+          @"
+private string test;
+
+public A() : this(true) { test = string.Empty; }
+public A(bool _) { test = string.Empty; }
+");
+      var syntax = (FieldDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.FieldDeclaration));
+      var field = CreateFieldWrapper (syntax, semantic);
+      var sut = new UninitializedFieldRewriter((b, c) => { });
+
+      var result = sut.Rewrite (field);
+
+      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+    }
+
+    [Test]
+    public void InitializedInCtorChain_FirstCtorToNotNull_Nullable ()
+    {
+      //language=C#
+      const string expected = @"
+private string? test;
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
+          "A",
+          //language=C#
+          @"
+private string test;
+
+public A() : this(true) { test = string.Empty; }
+public A(bool _) { }
+");
+      var syntax = (FieldDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.FieldDeclaration));
+      var field = CreateFieldWrapper (syntax, semantic);
+      var sut = new UninitializedFieldRewriter((b, c) => { });
+
+      var result = sut.Rewrite (field);
+
+      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+    }
+
     private Field CreateFieldWrapper (
         FieldDeclarationSyntax syntax,
         SemanticModel semanticModel,

@@ -40,16 +40,30 @@ namespace NullableReferenceTypesRewriter.Analysis
           .Cast<ConstructorDeclarationSyntax>()
           .ToArray();
 
-      var isInitializedToNotNull = constructors.All(c => VariableInitializedToNotNull(semanticModel, c, node.Declaration.Variables.First()));
+      var isInitializedToNotNull = constructors.All(c => VariableInitializedToNotNullInCtorChain(semanticModel, c, node.Declaration.Variables.First()));
 
       if (constructors.Length == 0 || !isInitializedToNotNull)
         return ToNullable(node);
 
-      // TODO: check base calls
-
       return node;
 
       SyntaxNode? ToNullable(FieldDeclarationSyntax node) => node.WithDeclaration(node.Declaration.WithType(NullUtilities.ToNullable(node.Declaration.Type)));
+    }
+
+    private bool VariableInitializedToNotNullInCtorChain(SemanticModel semanticModel, ConstructorDeclarationSyntax constructor, VariableDeclaratorSyntax variable)
+    {
+      var isInitializedToNotNullInCurrent = VariableInitializedToNotNull(semanticModel, constructor, variable);
+
+      if (isInitializedToNotNullInCurrent)
+        return true;
+
+      if (constructor.Initializer is null)
+        return false;
+
+      var thisConstructorSymbol = semanticModel.GetSymbolInfo(constructor.Initializer).Symbol ?? throw new InvalidOperationException();
+      var thisConstructorSyntax = (ConstructorDeclarationSyntax) thisConstructorSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
+
+      return VariableInitializedToNotNullInCtorChain(semanticModel, thisConstructorSyntax, variable);
     }
 
     private bool VariableInitializedToNotNull(SemanticModel semanticModel, ConstructorDeclarationSyntax constructor, VariableDeclaratorSyntax variable)
