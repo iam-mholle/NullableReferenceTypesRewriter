@@ -27,14 +27,10 @@ namespace NullableReferenceTypesRewriter.Analysis
         return node;
 
       if (node.Declaration.Variables.All(d => IsInitializedToNotNull(semanticModel, d)))
-      {
         return node;
-      }
 
       if (node.Declaration.Variables.Any(d => IsInitializedToNull(semanticModel, d)))
-      {
-        return node.WithDeclaration(node.Declaration.WithType(NullUtilities.ToNullable(node.Declaration.Type)));
-      }
+        return ToNullable(node);
 
       var classSyntax = (ClassDeclarationSyntax) node.Ancestors().First(a => a.IsKind(SyntaxKind.ClassDeclaration));
       var symbol = semanticModel.GetDeclaredSymbol(node.Declaration.Variables.First());
@@ -47,13 +43,13 @@ namespace NullableReferenceTypesRewriter.Analysis
       var isInitializedToNotNull = constructors.All(c => VariableInitializedToNotNull(semanticModel, c, node.Declaration.Variables.First()));
 
       if (constructors.Length == 0 || !isInitializedToNotNull)
-      {
-        return node.WithDeclaration(node.Declaration.WithType(NullUtilities.ToNullable(node.Declaration.Type)));
-      }
+        return ToNullable(node);
 
       // TODO: check base calls
 
       return node;
+
+      SyntaxNode? ToNullable(FieldDeclarationSyntax node) => node.WithDeclaration(node.Declaration.WithType(NullUtilities.ToNullable(node.Declaration.Type)));
     }
 
     private bool VariableInitializedToNotNull(SemanticModel semanticModel, ConstructorDeclarationSyntax constructor, VariableDeclaratorSyntax variable)
