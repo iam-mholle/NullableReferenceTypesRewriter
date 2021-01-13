@@ -26,7 +26,7 @@ namespace NullableReferenceTypesRewriter.Analysis
         {
           if (parent is Method parentMethod)
           {
-            var isArgumentPossiblyNull = IsArgumentPossiblyNull(parentMethod, i);
+            var isArgumentPossiblyNull = IsArgumentPossiblyNull(symbol!, parentMethod, i);
             if (isArgumentPossiblyNull)
             {
               parametersToAnnotate.Add(i);
@@ -51,16 +51,28 @@ namespace NullableReferenceTypesRewriter.Analysis
       return node.WithParameterList(newList);
     }
 
-    public bool IsArgumentPossiblyNull(Method method, int argumentIndex)
+    public bool IsArgumentPossiblyNull(ISymbol symbol, Method method, int argumentIndex)
     {
       var syntax = method.MethodDeclaration;
 
       if (syntax.Body is null)
         return false;
 
-      var invocations = syntax.Body.DescendantNodes().Where(n => n.IsKind(SyntaxKind.InvocationExpression)).Cast<InvocationExpressionSyntax>().ToArray();
+      var invocations = syntax.Body.DescendantNodes()
+          .Where(n => n.IsKind(SyntaxKind.InvocationExpression))
+          .Cast<InvocationExpressionSyntax>()
+          .Where(i => SymbolEqualityComparer.Default.Equals(method.SemanticModel.GetSymbolInfo(i.Expression).Symbol, symbol))
+          .ToArray();
 
-      return invocations.Any(i => NullUtilities.CanBeNull(i.ArgumentList.Arguments[argumentIndex].Expression, CurrentMethod.SemanticModel));
+      return invocations.Any(i =>
+      {
+        if (i.ArgumentList.Arguments.Count <= argumentIndex)
+        {
+          return false;
+        }
+
+        return NullUtilities.CanBeNull (i.ArgumentList.Arguments[argumentIndex].Expression, method.SemanticModel);
+      });
     }
   }
 }
