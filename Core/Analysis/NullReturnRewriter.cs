@@ -16,7 +16,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     public override SyntaxNode? VisitMethodDeclaration (MethodDeclarationSyntax node)
     {
-      var semanticModel = _currentMethod.SemanticModel;
+      var semanticModel = CurrentMethod.SemanticModel;
 
       if (MayReturnNull(node, semanticModel!))
       {

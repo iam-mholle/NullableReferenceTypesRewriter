@@ -18,7 +18,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     public override SyntaxNode? VisitFieldDeclaration (FieldDeclarationSyntax node)
     {
-      var semanticModel = _currentField.SemanticModel;
+      var semanticModel = CurrentField.SemanticModel;
 
       if (IsValueType(semanticModel, node))
         return node;

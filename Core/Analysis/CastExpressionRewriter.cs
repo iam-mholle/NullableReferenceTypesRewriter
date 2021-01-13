@@ -20,7 +20,7 @@ namespace NullableReferenceTypesRewriter.Analysis
       if (type is NullableTypeSyntax)
         return node;
 
-      var semanticModel = _currentMethod.SemanticModel;
+      var semanticModel = CurrentMethod.SemanticModel;
 
       return NullUtilities.CanBeNull (node.Expression, semanticModel)
           ? node.WithType (NullUtilities.ToNullable (type))
