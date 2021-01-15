@@ -63,6 +63,9 @@ namespace NullableReferenceTypesRewriter.Utilities
 
     public static MethodDeclarationSyntax ToNullReturning (MethodDeclarationSyntax method)
     {
+      if (method.TypeParameterList is { } && method.TypeParameterList.Parameters.Any(tp => method.ReturnType.ToString().Equals(tp.ToString())))
+        return method;
+
       return method.WithReturnType (ToNullable (method.ReturnType));
     }
 

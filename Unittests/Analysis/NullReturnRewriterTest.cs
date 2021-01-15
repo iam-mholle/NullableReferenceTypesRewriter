@@ -343,6 +343,34 @@ public object DoStuff<T>(T obj)
       Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
     }
 
+    [Test]
+    public void MethodReturningGenericArgumentOfGenericType_WithNotEqualsNullCheck_ReturnValueUnchanged ()
+    {
+      //language=C#
+      const string expected = @"
+public T DoStuff<T>(T obj)
+{
+  return null;
+}
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
+          "A",
+          //language=C#
+          @"
+public T DoStuff<T>(T obj)
+{
+  return null;
+}
+");
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
+      var method = CreateMethodWrapper (syntax, semantic);
+      var sut = new NullReturnRewriter((b, c) => { });
+
+      var result = sut.Rewrite (method);
+
+      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+    }
+
     private Method CreateMethodWrapper (
         MethodDeclarationSyntax syntax,
         SemanticModel semanticModel,
