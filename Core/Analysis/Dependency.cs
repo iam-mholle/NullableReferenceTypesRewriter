@@ -9,9 +9,11 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     public INode From => _from();
     public INode To => _to();
+    public DependencyType DependencyType { get; }
 
-    public Dependency (Func<INode> from, Func<INode> to)
+    public Dependency (Func<INode> from, Func<INode> to, DependencyType dependencyType)
     {
+      DependencyType = dependencyType;
       _from = @from;
       _to = to;
     }

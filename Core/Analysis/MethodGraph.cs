@@ -43,7 +43,7 @@ namespace NullableReferenceTypesRewriter.Analysis
       _members[uniqueName] = field;
     }
 
-    public void AddDependency (string fromMethodSymbol, string toMethodSymbol)
+    public void AddDependency (string fromMethodSymbol, string toMethodSymbol, DependencyType dependencyType)
     {
       var dependency = new Dependency (
           () =>
@@ -59,7 +59,8 @@ namespace NullableReferenceTypesRewriter.Analysis
               return to;
 
             return null!;
-          });
+          },
+          dependencyType);
 
       if (!_byFrom.ContainsKey(fromMethodSymbol))
         _byFrom[fromMethodSymbol] = new List<Dependency>();

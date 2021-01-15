@@ -34,7 +34,8 @@ namespace NullableReferenceTypesRewriter.Analysis
         {
           _graph.AddDependency(
               UniqueSymbolNameGenerator.Generate(interfaceMethod),
-              UniqueSymbolNameGenerator.Generate(symbol));
+              UniqueSymbolNameGenerator.Generate(symbol),
+              DependencyType.Inheritance);
         }
       }
 
@@ -42,7 +43,8 @@ namespace NullableReferenceTypesRewriter.Analysis
       {
         _graph.AddDependency (
             UniqueSymbolNameGenerator.Generate (overriddenMethod!),
-            UniqueSymbolNameGenerator.Generate (symbol));
+            UniqueSymbolNameGenerator.Generate (symbol),
+            DependencyType.Inheritance);
       }
 
       base.VisitMethodDeclaration (node);
@@ -94,7 +96,8 @@ namespace NullableReferenceTypesRewriter.Analysis
 
         _graph.AddDependency (
             UniqueSymbolNameGenerator.Generate (containingMethodSymbol),
-            UniqueSymbolNameGenerator.Generate (invokedMethodSymbol));
+            UniqueSymbolNameGenerator.Generate (invokedMethodSymbol),
+            DependencyType.Usage);
       }
 
       base.VisitInvocationExpression (node);
@@ -115,7 +118,8 @@ namespace NullableReferenceTypesRewriter.Analysis
         {
           _graph.AddDependency(
               UniqueSymbolNameGenerator.Generate(containingMethodSymbol),
-              UniqueSymbolNameGenerator.Generate(fieldSymbol));
+              UniqueSymbolNameGenerator.Generate(fieldSymbol),
+              DependencyType.Usage);
         }
       }
 

@@ -37,7 +37,7 @@ public void CallAboveMethod()
       var callingSyntax = (MethodDeclarationSyntax) root.DescendantNodes ().Last(n => n.IsKind (SyntaxKind.MethodDeclaration));
       var callingMethod = CreateMethodWrapper(callingSyntax, semantic);
       var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      method = CreateMethodWrapper (syntax, semantic, () => new []{ new Dependency(() => callingMethod, () => method) });
+      method = CreateMethodWrapper (syntax, semantic, () => new []{ new Dependency(() => callingMethod, () => method, DependencyType.Usage) });
       var sut = new MethodArgumentRewriter((b, c) => { });
 
       var result = sut.Rewrite (method);
@@ -71,7 +71,7 @@ public void CallAboveMethod()
       var callingSyntax = (MethodDeclarationSyntax) root.DescendantNodes ().Last(n => n.IsKind (SyntaxKind.MethodDeclaration));
       var callingMethod = CreateMethodWrapper(callingSyntax, semantic);
       var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      method = CreateMethodWrapper (syntax, semantic, () => new []{ new Dependency(() => callingMethod, () => method) });
+      method = CreateMethodWrapper (syntax, semantic, () => new []{ new Dependency(() => callingMethod, () => method, DependencyType.Usage) });
       var sut = new MethodArgumentRewriter((b, c) => { });
 
       var result = sut.Rewrite (method);
@@ -105,7 +105,7 @@ public void CallAboveMethod()
       var callingSyntax = (MethodDeclarationSyntax) root.DescendantNodes ().Last(n => n.IsKind (SyntaxKind.MethodDeclaration));
       var callingMethod = CreateMethodWrapper(callingSyntax, semantic);
       var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      method = CreateMethodWrapper (syntax, semantic, () => new []{ new Dependency(() => callingMethod, () => method) });
+      method = CreateMethodWrapper (syntax, semantic, () => new []{ new Dependency(() => callingMethod, () => method, DependencyType.Usage) });
       var sut = new MethodArgumentRewriter((b, c) => { });
 
       var result = sut.Rewrite (method);
@@ -139,7 +139,7 @@ public void CallAboveMethod()
       var callingSyntax = (MethodDeclarationSyntax) root.DescendantNodes ().Last(n => n.IsKind (SyntaxKind.MethodDeclaration));
       var callingMethod = CreateMethodWrapper(callingSyntax, semantic);
       var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      method = CreateMethodWrapper (syntax, semantic, () => new []{ new Dependency(() => callingMethod, () => method) });
+      method = CreateMethodWrapper (syntax, semantic, () => new []{ new Dependency(() => callingMethod, () => method, DependencyType.Usage) });
       var sut = new MethodArgumentRewriter((b, c) => { });
 
       var result = sut.Rewrite (method);
@@ -173,7 +173,7 @@ public void CallAboveMethod()
       var callingSyntax = (MethodDeclarationSyntax) root.DescendantNodes ().Last(n => n.IsKind (SyntaxKind.MethodDeclaration));
       var callingMethod = CreateMethodWrapper(callingSyntax, semantic);
       var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      method = CreateMethodWrapper (syntax, semantic, () => new []{ new Dependency(() => callingMethod, () => method) });
+      method = CreateMethodWrapper (syntax, semantic, () => new []{ new Dependency(() => callingMethod, () => method, DependencyType.Usage) });
       var sut = new MethodArgumentRewriter((b, c) => { });
 
       var result = sut.Rewrite (method);
@@ -207,7 +207,7 @@ public void CallAboveMethod()
       var callingSyntax = (MethodDeclarationSyntax) root.DescendantNodes ().Last(n => n.IsKind (SyntaxKind.MethodDeclaration));
       var callingMethod = CreateMethodWrapper(callingSyntax, semantic);
       var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      method = CreateMethodWrapper (syntax, semantic, () => new []{ new Dependency(() => callingMethod, () => method) });
+      method = CreateMethodWrapper (syntax, semantic, () => new []{ new Dependency(() => callingMethod, () => method, DependencyType.Usage) });
       var sut = new MethodArgumentRewriter((b, c) => { });
 
       var result = sut.Rewrite (method);
@@ -241,7 +241,7 @@ public void CallAboveMethod()
       var callingSyntax = (MethodDeclarationSyntax) root.DescendantNodes ().Last(n => n.IsKind (SyntaxKind.MethodDeclaration));
       var callingMethod = CreateMethodWrapper(callingSyntax, semantic);
       var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      method = CreateMethodWrapper (syntax, semantic, () => new []{ new Dependency(() => callingMethod, () => method) });
+      method = CreateMethodWrapper (syntax, semantic, () => new []{ new Dependency(() => callingMethod, () => method, DependencyType.Usage) });
       var sut = new MethodArgumentRewriter((b, c) => { });
 
       var result = sut.Rewrite (method);
