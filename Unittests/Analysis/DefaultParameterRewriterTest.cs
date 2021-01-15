@@ -13,6 +13,32 @@ namespace NullableReferenceTypesRewriter.UnitTests.Analysis
   public class DefaultParameterRewriterTest
   {
     [Test]
+    public void DefaultParameter_InCtor_Nullable()
+    {
+      //language=C#
+      const string expected = @"
+public A(object? obj = null)
+{
+}
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
+          "A",
+          //language=C#
+          @"
+public A(object obj = null)
+{
+}
+");
+      var syntax = (ConstructorDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.ConstructorDeclaration));
+      var method = CreateMethodWrapper (syntax, semantic);
+      var sut = new DefaultParameterRewriter((b, c) => { });
+
+      var result = sut.Rewrite (method);
+
+      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+    }
+
+    [Test]
     public void DefaultParameter_Null_Nullable()
     {
       //language=C#
@@ -91,7 +117,7 @@ public void DoStuff(int? value = null)
     }
 
     private Method CreateMethodWrapper (
-        MethodDeclarationSyntax syntax,
+        BaseMethodDeclarationSyntax syntax,
         SemanticModel semanticModel,
         Func<IReadOnlyCollection<Dependency>>? parents = null,
         Func<IReadOnlyCollection<Dependency>>? children = null)

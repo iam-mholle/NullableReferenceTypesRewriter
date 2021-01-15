@@ -39,7 +39,12 @@ namespace NullableReferenceTypesRewriter.Analysis
     {
       CurrentMethod = method;
 
-      var rewritten = VisitMethodDeclaration ((MethodDeclarationSyntax) method.RewritableSyntaxNode);
+      var rewritten = method.RewritableSyntaxNode switch
+      {
+          MethodDeclarationSyntax m => VisitMethodDeclaration(m),
+          ConstructorDeclarationSyntax c => VisitConstructorDeclaration(c),
+          _ => throw new InvalidOperationException($"{method.RewritableSyntaxNode.GetType()} is not supported."),
+      };
 
       if (rewritten == null)
         throw new InvalidOperationException ("Could not rewrite method.");

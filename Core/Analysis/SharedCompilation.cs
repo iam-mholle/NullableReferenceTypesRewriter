@@ -61,7 +61,7 @@ namespace NullableReferenceTypesRewriter.Analysis
       return GetSemanticModel (tree);
     }
 
-    public MethodDeclarationSyntax GetMethodDeclarationSyntax (string filePath, string signature)
+    public BaseMethodDeclarationSyntax GetMethodDeclarationSyntax (string filePath, string signature)
     {
       return _compilation.SyntaxTrees
           .Where (t => t.FilePath == filePath)
@@ -69,7 +69,7 @@ namespace NullableReferenceTypesRewriter.Analysis
               t =>
                   t.GetRoot()
                       .DescendantNodes (_ => true)
-                      .OfType<MethodDeclarationSyntax>()
+                      .OfType<BaseMethodDeclarationSyntax>()
                       .Where (n => NullabilityTrimmingEquals(_compilation.GetSemanticModel (t).GetDeclaredSymbol (n)!.ToDisplayString(),signature)))
           .Single();
     }

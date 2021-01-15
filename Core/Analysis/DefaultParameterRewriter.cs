@@ -15,6 +15,16 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
     {
+      return RewriteMethod(node);
+    }
+
+    public override SyntaxNode? VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
+    {
+      return RewriteMethod(node);
+    }
+
+    private static SyntaxNode RewriteMethod(BaseMethodDeclarationSyntax node)
+    {
       if (node.ParameterList.Parameters.Count == 0)
         return node;
 

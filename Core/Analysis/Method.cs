@@ -14,7 +14,7 @@ namespace NullableReferenceTypesRewriter.Analysis
     private readonly Func<IReadOnlyCollection<Dependency>> _parents;
     private readonly Func<IReadOnlyCollection<Dependency>> _children;
 
-    public MethodDeclarationSyntax MethodDeclaration => _compilation.GetMethodDeclarationSyntax(_filePath, _signature);
+    public BaseMethodDeclarationSyntax MethodDeclaration => _compilation.GetMethodDeclarationSyntax(_filePath, _signature);
     public SemanticModel SemanticModel => _compilation.GetSemanticModel (_filePath);
     public IReadOnlyCollection<Dependency> Parents => _parents();
     public IReadOnlyCollection<Dependency> Children => _children();
