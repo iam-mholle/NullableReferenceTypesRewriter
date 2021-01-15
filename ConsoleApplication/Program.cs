@@ -60,6 +60,23 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
         node.Accept (visitor);
       }
 
+      for (var i = 0; i < queue.Count; i++)
+      {
+        var item = queue[i];
+
+        foreach (var (node, rewriteCapability) in item.Item2)
+        {
+          if (rewriteCapability == RewriteCapability.ParameterChange)
+          {
+            node.Rewrite(new DefaultParameterRewriter((b, c) => queue.Add((b, c))));
+            node.Rewrite(new CastExpressionRewriter((b, c) => queue.Add((b, c))));
+            node.Rewrite(new LocalDeclarationRewriter((b, c) => queue.Add((b, c))));
+            node.Rewrite(new MethodArgumentRewriter((b, c) => queue.Add((b, c))));
+            node.Rewrite(new InheritanceParameterRewriter((b, c) => queue.Add((b, c))));
+          }
+        }
+      }
+
       sharedCompilation.WriteChanges();
     }
 
