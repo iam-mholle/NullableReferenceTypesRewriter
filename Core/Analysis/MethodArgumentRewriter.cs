@@ -10,7 +10,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 {
   public class MethodArgumentRewriter : RewriterBase
   {
-    public MethodArgumentRewriter(Action<RewriterBase, IReadOnlyCollection<IRewritable>> additionalRewrites)
+    public MethodArgumentRewriter(Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
         : base(additionalRewrites)
     {
     }

@@ -10,7 +10,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 {
   public class InheritanceParameterRewriter : RewriterBase
   {
-    public InheritanceParameterRewriter(Action<RewriterBase, IReadOnlyCollection<IRewritable>> additionalRewrites)
+    public InheritanceParameterRewriter(Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
         : base(additionalRewrites)
     {
     }

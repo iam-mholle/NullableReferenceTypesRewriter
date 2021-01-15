@@ -9,7 +9,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 {
   public class CastExpressionRewriter : RewriterBase
   {
-    public CastExpressionRewriter (Action<RewriterBase, IReadOnlyCollection<IRewritable>> additionalRewrites)
+    public CastExpressionRewriter (Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
         : base(additionalRewrites)
     {
     }
@@ -27,11 +27,14 @@ namespace NullableReferenceTypesRewriter.Analysis
           : node;
     }
 
-    protected override IReadOnlyCollection<IRewritable> GetAdditionalRewrites (Method method)
+    protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites (Method method)
     {
-      return method.Parents.Select (p => p.From)
-          .Concat (method.Children.Select (c => c.To))
-          .OfType<IRewritable>()
+      return method.Parents.Select(p => p.From).OfType<IRewritable>()
+          .Select(r => (r, RewriteCapability.ReturnValueChange))
+          .Concat(method.Children
+              .Select(c => c.To)
+              .OfType<IRewritable>()
+              .Select(r => (r, RewriteCapability.ParameterChange)))
           .ToArray();
     }
   }

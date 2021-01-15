@@ -12,7 +12,7 @@ namespace NullableReferenceTypesRewriter.Analysis
     private readonly RewriterBase _methodArgumentRewriter;
     private readonly RewriterBase _uninitializedFieldRewriter;
 
-    public TestVisitor (Action<RewriterBase, IReadOnlyCollection<IRewritable>> additionalRewrites)
+    public TestVisitor (Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
     {
       _nullReturnRewriter = new NullReturnRewriter(additionalRewrites);
       _castExpressionRewriter = new CastExpressionRewriter (additionalRewrites);

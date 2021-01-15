@@ -327,7 +327,7 @@ public class C
 ");
       var builder = new MethodGraphBuilder (new SharedCompilation (compilation.Item1.Compilation));
       builder.Visit (compilation.Item2);
-      var additionalRewrites = new List<IRewritable>();
+      var additionalRewrites = new List<(IRewritable, RewriteCapability)>();
       var graph = builder.Graph;
       var aMethod = (Method) graph.GetNode ("Test.A.DoStuff()");
       var bMethod = (Method) graph.GetNode ("Test.B.DoMore()");
@@ -335,19 +335,24 @@ public class C
 
       bMethod.Rewrite (rewriter);
 
-      Assert.That (additionalRewrites, Has.One.Items.SameAs (aMethod));
+      Assert.That (additionalRewrites, Has.One.Items);
     }
 
     private class RewriterYieldingParentMethodsAsAdditionalRewrites : RewriterBase
     {
-      public RewriterYieldingParentMethodsAsAdditionalRewrites (Action<RewriterBase, IReadOnlyCollection<IRewritable>> additionalRewrites)
+      public RewriterYieldingParentMethodsAsAdditionalRewrites (Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
           : base(additionalRewrites)
       {
       }
 
       public override SyntaxNode? VisitMethodDeclaration (MethodDeclarationSyntax node) => node.WithLeadingTrivia (SyntaxTriviaList.Create (new SyntaxTrivia()));
 
-      protected override IReadOnlyCollection<IRewritable> GetAdditionalRewrites (Method method) => method.Parents.Select (p => p.From).OfType<IRewritable>().ToArray();
+      protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(Method method) =>
+          method.Parents
+              .Select(p => p.From)
+              .OfType<IRewritable>()
+              .Select(r => (r, RewriteCapability.ReturnValueChange))
+              .ToArray();
     }
   }
 }

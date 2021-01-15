@@ -9,7 +9,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 {
   public class LocalDeclarationRewriter : RewriterBase
   {
-    public LocalDeclarationRewriter(Action<RewriterBase, IReadOnlyCollection<IRewritable>> additionalRewrites)
+    public LocalDeclarationRewriter(Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
         : base(additionalRewrites)
     {
     }

@@ -11,7 +11,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 {
   public class UninitializedFieldRewriter : RewriterBase
   {
-    public UninitializedFieldRewriter (Action<RewriterBase, IReadOnlyCollection<IRewritable>> additionalRewrites)
+    public UninitializedFieldRewriter (Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
         : base(additionalRewrites)
     {
     }
