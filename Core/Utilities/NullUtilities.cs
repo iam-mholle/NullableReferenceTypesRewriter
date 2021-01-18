@@ -63,6 +63,8 @@ namespace NullableReferenceTypesRewriter.Utilities
 
     public static MethodDeclarationSyntax ToNullReturning (MethodDeclarationSyntax method)
     {
+      // TODO: Should annotate if constrained to a class.
+      // TODO: Should not annotate if it is a generic class parameter (unconstrained).
       if (method.TypeParameterList is { } && method.TypeParameterList.Parameters.Any(tp => method.ReturnType.ToString().Equals(tp.ToString())))
         return method;
 

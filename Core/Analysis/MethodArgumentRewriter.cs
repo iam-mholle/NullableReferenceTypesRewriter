@@ -8,6 +8,8 @@ using NullableReferenceTypesRewriter.Utilities;
 
 namespace NullableReferenceTypesRewriter.Analysis
 {
+  // TODO: Does not work with .ctor calls
+  // TODO: Somehow doesn't work sometimes: [CanBeNull] IFluentScreenshotElement parent = null
   public class MethodArgumentRewriter : RewriterBase
   {
     public MethodArgumentRewriter(Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)

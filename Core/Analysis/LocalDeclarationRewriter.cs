@@ -7,6 +7,7 @@ using NullableReferenceTypesRewriter.Utilities;
 
 namespace NullableReferenceTypesRewriter.Analysis
 {
+  // TODO: Should annotate uninitialized local variables.
   public class LocalDeclarationRewriter : RewriterBase
   {
     public LocalDeclarationRewriter(Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)

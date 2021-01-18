@@ -6,6 +6,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace NullableReferenceTypesRewriter.Analysis
 {
+  // TODO: Separate CanBeNullAttributeRewriter
+  // TODO: Integrate properties.
   public abstract class RewriterBase : CSharpSyntaxRewriter
   {
     private readonly Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> _additionalRewrites;
