@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NullableReferenceTypesRewriter.Utilities;
@@ -39,6 +40,15 @@ namespace NullableReferenceTypesRewriter.Analysis
       }
 
       return node.WithParameterList(res);
+    }
+
+    protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(Method method)
+    {
+      return method.Parents
+          .Select(p => p.From)
+          .OfType<IRewritable>()
+          .Select(r => (r, RewriteCapability.ParameterChange))
+          .ToArray();
     }
   }
 }

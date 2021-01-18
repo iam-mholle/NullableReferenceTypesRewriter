@@ -74,5 +74,14 @@ namespace NullableReferenceTypesRewriter.Analysis
         return NullUtilities.CanBeNull (i.ArgumentList.Arguments[argumentIndex].Expression, method.SemanticModel);
       });
     }
+
+    protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(Method method)
+    {
+      return method.Parents
+          .Select(p => p.From)
+          .OfType<IRewritable>()
+          .Select(r => (r, RewriteCapability.ReturnValueChange))
+          .ToArray();
+    }
   }
 }

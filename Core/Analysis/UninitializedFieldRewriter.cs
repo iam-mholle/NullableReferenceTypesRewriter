@@ -50,6 +50,15 @@ namespace NullableReferenceTypesRewriter.Analysis
       SyntaxNode? ToNullable(FieldDeclarationSyntax node) => node.WithDeclaration(node.Declaration.WithType(NullUtilities.ToNullable(node.Declaration.Type)));
     }
 
+    protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(Method method)
+    {
+      return method.Parents
+          .Select(p => p.From)
+          .OfType<IRewritable>()
+          .Select(r => (r, RewriteCapability.ReturnValueChange))
+          .ToArray();
+    }
+
     private bool VariableInitializedToNotNullInCtorChain(SemanticModel semanticModel, ConstructorDeclarationSyntax constructor, VariableDeclaratorSyntax variable)
     {
       var isInitializedToNotNullInCurrent = VariableInitializedToNotNull(semanticModel, constructor, variable);

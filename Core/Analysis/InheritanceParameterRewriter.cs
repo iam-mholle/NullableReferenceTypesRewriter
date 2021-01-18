@@ -52,5 +52,14 @@ namespace NullableReferenceTypesRewriter.Analysis
 
       return syntax.ParameterList.Parameters[argumentIndex].Type is NullableTypeSyntax;
     }
+
+    protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(Method method)
+    {
+      return method.Parents
+          .Select(p => p.From)
+          .OfType<IRewritable>()
+          .Select(r => (r, RewriteCapability.ParameterChange))
+          .ToArray();
+    }
   }
 }

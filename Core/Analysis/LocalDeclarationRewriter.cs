@@ -32,5 +32,14 @@ namespace NullableReferenceTypesRewriter.Analysis
           ? node.WithDeclaration (node.Declaration.WithType (NullUtilities.ToNullable (type)))
           : node;
     }
+
+    protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(Method method)
+    {
+      return method.Children
+          .Select(p => p.To)
+          .OfType<IRewritable>()
+          .Select(r => (r, RewriteCapability.ParameterChange))
+          .ToArray();
+    }
   }
 }
