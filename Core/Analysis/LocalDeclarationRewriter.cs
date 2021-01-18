@@ -7,7 +7,6 @@ using NullableReferenceTypesRewriter.Utilities;
 
 namespace NullableReferenceTypesRewriter.Analysis
 {
-  // TODO: Should annotate uninitialized local variables.
   public class LocalDeclarationRewriter : RewriterBase
   {
     public LocalDeclarationRewriter(Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
@@ -25,9 +24,14 @@ namespace NullableReferenceTypesRewriter.Analysis
 
       var type = node.Declaration.Type;
 
+      var typeInfo = CurrentMethod.SemanticModel.GetTypeInfo(type);
+
       var isNullable = node.Declaration.Variables
           .Where (variable => variable.Initializer != null)
           .Any (variable => NullUtilities.CanBeNull (variable.Initializer!.Value, CurrentMethod.SemanticModel));
+
+      isNullable |= typeInfo.Type!.IsReferenceType
+                    && node.Declaration.Variables.Any(v => v.Initializer is null);
 
       return isNullable
           ? node.WithDeclaration (node.Declaration.WithType (NullUtilities.ToNullable (type)))

@@ -13,6 +13,62 @@ namespace NullableReferenceTypesRewriter.UnitTests.Analysis
   public class LocalDeclarationRewriterTest
   {
     [Test]
+    public void SingleDeclaration_UninitializedValueType_Unchanged()
+    {
+      //language=C#
+      const string expected = @"
+public void DoStuff()
+{
+  int a;
+}
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
+          "A",
+          //language=C#
+          @"
+public void DoStuff()
+{
+  int a;
+}
+");
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration));
+      var method = CreateMethodWrapper (syntax, semantic);
+      var sut = new LocalDeclarationRewriter((b, c) => { });
+
+      var result = sut.Rewrite (method);
+
+      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+    }
+
+    [Test]
+    public void SingleDeclaration_UninitializedReferenceType_Nullable()
+    {
+      //language=C#
+      const string expected = @"
+public void DoStuff()
+{
+  string? a;
+}
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
+          "A",
+          //language=C#
+          @"
+public void DoStuff()
+{
+  string a;
+}
+");
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration));
+      var method = CreateMethodWrapper (syntax, semantic);
+      var sut = new LocalDeclarationRewriter((b, c) => { });
+
+      var result = sut.Rewrite (method);
+
+      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+    }
+
+    [Test]
     public void SingleDeclaration_InitializedToNull_Nullable()
     {
       //language=C#
