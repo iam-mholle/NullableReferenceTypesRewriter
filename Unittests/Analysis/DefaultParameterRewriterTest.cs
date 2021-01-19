@@ -116,6 +116,32 @@ public void DoStuff(int? value = null)
       Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
     }
 
+    [Test]
+    public void InterfaceDefaultParameter_Null_Nullable()
+    {
+      //language=C#
+      const string expected = @"
+public void DoStuff(IReadOnlyCollection<string>? value = null)
+{
+}
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
+          "A",
+          //language=C#
+          @"
+public void DoStuff(IReadOnlyCollection<string> value = null)
+{
+}
+");
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
+      var method = CreateMethodWrapper (syntax, semantic);
+      var sut = new DefaultParameterRewriter((b, c) => { });
+
+      var result = sut.Rewrite (method);
+
+      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+    }
+
     private Method CreateMethodWrapper (
         BaseMethodDeclarationSyntax syntax,
         SemanticModel semanticModel,
