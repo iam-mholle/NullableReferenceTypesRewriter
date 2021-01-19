@@ -7,6 +7,7 @@ using NullableReferenceTypesRewriter.Utilities;
 
 namespace NullableReferenceTypesRewriter.Analysis
 {
+  // TODO: handle default(T) initializer.
   public class DefaultParameterRewriter : RewriterBase
   {
     public DefaultParameterRewriter(Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)

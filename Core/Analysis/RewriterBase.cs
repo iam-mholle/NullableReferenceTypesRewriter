@@ -8,6 +8,8 @@ namespace NullableReferenceTypesRewriter.Analysis
 {
   // TODO: Separate CanBeNullAttributeRewriter
   // TODO: Integrate properties.
+  // TODO: Integrate events.
+  // TODO: Document rewriter capabilities thoroughly.
   public abstract class RewriterBase : CSharpSyntaxRewriter
   {
     private readonly Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> _additionalRewrites;

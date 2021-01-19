@@ -9,6 +9,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 {
   public class LocalDeclarationRewriter : RewriterBase
   {
+    // TODO: handle default(T) initializer.
     public LocalDeclarationRewriter(Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
         : base(additionalRewrites)
     {
