@@ -228,6 +228,42 @@ public class SomeDerived : SomeBase
       Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
     }
 
+    [Test]
+    public void InterfaceImplementation_NullableReturnValue_Nullable()
+    {
+      //language=C#
+      const string expected = @"
+  void DoStuff(string? value);
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInNameSpace(
+          "A",
+          //language=C#
+          @"
+public class ISomething
+{
+  void DoStuff(string value);
+}
+public class Something : ISomething
+{
+  public override void DoStuff(string? value)
+  {
+    // Something
+  }
+}
+");
+      Method method = null!;
+      var derivedSyntax = (MethodDeclarationSyntax) root.DescendantNodes ().Last(n => n.IsKind (SyntaxKind.MethodDeclaration));
+      var derivedMethod = CreateMethodWrapper(derivedSyntax, semantic);
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration));
+      var dependency = new Dependency(() => method, () => derivedMethod, DependencyType.Inheritance);
+      method = CreateMethodWrapper(syntax, semantic, null, () => new[] { dependency });
+      var sut = new InheritanceParameterRewriter((b, c) => { });
+
+      var result = sut.Rewrite (method);
+
+      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+    }
+
     private Method CreateMethodWrapper (
         MethodDeclarationSyntax syntax,
         SemanticModel semanticModel,
