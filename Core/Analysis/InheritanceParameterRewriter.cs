@@ -37,7 +37,7 @@ namespace NullableReferenceTypesRewriter.Analysis
         var existingParameter = newList.Parameters[parameterIndex];
         newList = newList.ReplaceNode(
             existingParameter,
-            existingParameter.WithType (NullUtilities.ToNullableWithGenericsCheck (existingParameter.Type!)));
+            existingParameter.WithType (NullUtilities.ToNullableWithGenericsCheck (CurrentMethod.SemanticModel, node, existingParameter.Type!)));
       }
 
       return node.WithParameterList(newList);

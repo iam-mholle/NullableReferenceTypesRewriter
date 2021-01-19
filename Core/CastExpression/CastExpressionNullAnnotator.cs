@@ -35,7 +35,7 @@ namespace NullableReferenceTypesRewriter.CastExpression
         return node;
 
       return NullUtilities.CanBeNull (node.Expression, _semanticModel)
-          ? node.WithType (NullUtilities.ToNullableWithGenericsCheck (type))
+          ? node.WithType (NullUtilities.ToNullable (type))
           : node;
     }
   }

@@ -44,7 +44,7 @@ namespace NullableReferenceTypesRewriter.LocalDeclaration
           .Any (variable => NullUtilities.CanBeNull (variable.Initializer!.Value, _semanticModel));
 
       return isNullable
-          ? node.WithDeclaration (node.Declaration.WithType (NullUtilities.ToNullableWithGenericsCheck (type)))
+          ? node.WithDeclaration (node.Declaration.WithType (NullUtilities.ToNullable (type)))
           : node;
     }
   }

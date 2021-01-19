@@ -34,7 +34,7 @@ namespace NullableReferenceTypesRewriter.Analysis
                     && node.Declaration.Variables.Any(v => v.Initializer is null);
 
       return isNullable
-          ? node.WithDeclaration (node.Declaration.WithType (NullUtilities.ToNullableWithGenericsCheck (type)))
+          ? node.WithDeclaration (node.Declaration.WithType (NullUtilities.ToNullable (type)))
           : node;
     }
 

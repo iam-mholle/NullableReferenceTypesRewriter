@@ -35,7 +35,7 @@ namespace NullableReferenceTypesRewriter.Properties
           || IsInClassOrStruct (node)
           && (GetterReturnsNull (node)
               || IsUninitialized (node)))
-        return node.WithType (NullUtilities.ToNullableWithGenericsCheck (node.Type));
+        return node.WithType (NullUtilities.ToNullable (node.Type));
 
       return node;
     }
