@@ -42,7 +42,7 @@ namespace NullableReferenceTypesRewriter.ClassFields
       if (_uninitializedVariables.Contains (node))
       {
         return node.WithDeclaration (
-            node.Declaration.WithType (NullUtilities.ToNullable(node.Declaration.Type)));
+            node.Declaration.WithType (NullUtilities.ToNullableWithGenericsCheck(node.Declaration.Type)));
       }
 
       return node;

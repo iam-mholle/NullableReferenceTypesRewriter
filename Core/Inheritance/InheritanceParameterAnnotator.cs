@@ -35,7 +35,7 @@ namespace NullableReferenceTypesRewriter.Inheritance
       if (_nullableInterfaces.TryGetValue (node, out var parameterNames))
       {
         if (parameterNames.Contains ("#return"))
-          node = node.WithReturnType (NullUtilities.ToNullable (node.ReturnType));
+          node = node.WithReturnType (NullUtilities.ToNullableWithGenericsCheck (node.ReturnType));
         var newParameterList = parameterNames.Aggregate (node.ParameterList, ToNullableParameter);
         return node.WithParameterList (newParameterList);
       }
@@ -51,7 +51,7 @@ namespace NullableReferenceTypesRewriter.Inheritance
       if (parameter == null)
         return parameterListSyntax;
 
-      var nullableParameter = parameter.WithType (NullUtilities.ToNullable (parameter.Type!));
+      var nullableParameter = parameter.WithType (NullUtilities.ToNullableWithGenericsCheck (parameter.Type!));
 
       return parameterListSyntax.WithParameters (parameterListSyntax.Parameters.Replace (parameter, nullableParameter));
     }

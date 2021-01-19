@@ -35,7 +35,7 @@ namespace NullableReferenceTypesRewriter.Analysis
       {
         if (parameter.Default is { Value: LiteralExpressionSyntax { Token: { Text: "null" } } })
         {
-          res = res.ReplaceNode(parameter.Type!, NullUtilities.ToNullable(parameter.Type!));
+          res = res.ReplaceNode(parameter.Type!, NullUtilities.ToNullableWithGenericsCheck(parameter.Type!));
         }
       }
 

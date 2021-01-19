@@ -43,7 +43,7 @@ namespace NullableReferenceTypesRewriter.MethodArguments
 
           var toReplace = newParameters.SingleOrDefault (param => param.Identifier.ToString() == parameter.Identifier.ToString());
           if (toReplace.Type != null)
-            newParameters = newParameters.Replace (toReplace, toReplace.WithType (NullUtilities.ToNullable (toReplace.Type)));
+            newParameters = newParameters.Replace (toReplace, toReplace.WithType (NullUtilities.ToNullableWithGenericsCheck (toReplace.Type)));
         }
       }
 

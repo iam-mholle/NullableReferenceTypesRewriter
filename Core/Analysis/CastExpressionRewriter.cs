@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NullableReferenceTypesRewriter.Utilities;
 
@@ -24,7 +25,7 @@ namespace NullableReferenceTypesRewriter.Analysis
       var semanticModel = CurrentMethod.SemanticModel;
 
       return NullUtilities.CanBeNull (node.Expression, semanticModel)
-          ? node.WithType (NullUtilities.ToNullable (type))
+          ? node.WithType (ToNullableWithFittingContext (type))
           : node;
     }
 
@@ -37,6 +38,32 @@ namespace NullableReferenceTypesRewriter.Analysis
               .OfType<IRewritable>()
               .Select(r => (r, RewriteCapability.ParameterChange)))
           .ToArray();
+    }
+
+    private TypeSyntax ToNullableWithFittingContext(TypeSyntax typeSyntax)
+    {
+      Func<TypeSyntax>? annotator = null;
+
+      var containingMethod = typeSyntax.Ancestors()
+          .Where(a => a.IsKind(SyntaxKind.MethodDeclaration))
+          .Cast<MethodDeclarationSyntax>()
+          .SingleOrDefault();
+
+      if (containingMethod is null)
+      {
+        var containingClass = typeSyntax.Ancestors()
+            .Where(a => a.IsKind(SyntaxKind.ClassDeclaration))
+            .Cast<ClassDeclarationSyntax>()
+            .First();
+
+        annotator = () => NullUtilities.ToNullableWithGenericsCheck(CurrentField.SemanticModel, containingClass, typeSyntax);
+      }
+      else
+      {
+        annotator = () => NullUtilities.ToNullableWithGenericsCheck(CurrentMethod.SemanticModel, containingMethod, typeSyntax);
+      }
+
+      return annotator();
     }
   }
 }

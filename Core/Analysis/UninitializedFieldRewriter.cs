@@ -29,10 +29,11 @@ namespace NullableReferenceTypesRewriter.Analysis
       if (node.Declaration.Variables.All(d => IsInitializedToNotNull(semanticModel, d)))
         return node;
 
+      var classSyntax = (ClassDeclarationSyntax) node.Ancestors().First(a => a.IsKind(SyntaxKind.ClassDeclaration));
+
       if (node.Declaration.Variables.Any(d => IsInitializedToNull(semanticModel, d)))
         return ToNullable(node);
 
-      var classSyntax = (ClassDeclarationSyntax) node.Ancestors().First(a => a.IsKind(SyntaxKind.ClassDeclaration));
       var symbol = semanticModel.GetDeclaredSymbol(node.Declaration.Variables.First());
 
       var constructors = classSyntax.ChildNodes()
@@ -47,7 +48,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 
       return node;
 
-      SyntaxNode? ToNullable(FieldDeclarationSyntax node) => node.WithDeclaration(node.Declaration.WithType(NullUtilities.ToNullable(node.Declaration.Type)));
+      SyntaxNode? ToNullable(FieldDeclarationSyntax node) => node.WithDeclaration(node.Declaration.WithType(NullUtilities.ToNullableWithGenericsCheck(CurrentField.SemanticModel, classSyntax, node.Declaration.Type)));
     }
 
     protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(Method method)

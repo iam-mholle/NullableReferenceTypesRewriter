@@ -67,7 +67,23 @@ namespace NullableReferenceTypesRewriter.Utilities
       return method;
     }
 
-    public static TypeSyntax ToNullable (TypeSyntax typeSyntax)
+    public static TypeSyntax ToNullableWithGenericsCheck (SemanticModel semanticModel, MethodDeclarationSyntax methodDeclarationSyntax, TypeSyntax typeSyntax)
+    {
+      if (ShouldAnnotateType(semanticModel, methodDeclarationSyntax, typeSyntax))
+        return ToNullable(typeSyntax);
+
+      return typeSyntax;
+    }
+
+    public static TypeSyntax ToNullableWithGenericsCheck (SemanticModel semanticModel, ClassDeclarationSyntax classDeclarationSyntax, TypeSyntax typeSyntax)
+    {
+      if (ShouldAnnotateType(semanticModel, classDeclarationSyntax, typeSyntax))
+        return ToNullable(typeSyntax);
+
+      return typeSyntax;
+    }
+
+    public static TypeSyntax ToNullable(TypeSyntax typeSyntax)
     {
       if (typeSyntax is NullableTypeSyntax)
         return typeSyntax;
@@ -106,11 +122,33 @@ namespace NullableReferenceTypesRewriter.Utilities
       return methodDeclarationSyntax.ConstraintClauses.Concat(classClauses).Where(clause => clause.Name.ToString() == typeSyntax.ToString()).SelectMany(c => c.Constraints).ToArray();
     }
 
+    private static IReadOnlyCollection<TypeParameterConstraintSyntax> GetConstraints(ClassDeclarationSyntax classDeclarationSyntax, TypeSyntax typeSyntax)
+    {
+      return classDeclarationSyntax.ConstraintClauses.Where(clause => clause.Name.ToString() == typeSyntax.ToString()).SelectMany(c => c.Constraints).ToArray();
+    }
+
     private static bool ShouldAnnotateType(SemanticModel semanticModel, MethodDeclarationSyntax methodDeclarationSyntax, TypeSyntax typeSyntax)
     {
       if (IsGenericParameter(methodDeclarationSyntax, typeSyntax))
       {
         var constraints = GetConstraints(methodDeclarationSyntax, typeSyntax);
+        if (constraints.Any(c => c is ClassOrStructConstraintSyntax { ClassOrStructKeyword: { Value: "class" } })
+            || constraints.OfType<TypeConstraintSyntax>().Any(c => semanticModel.GetTypeInfo(c.Type).Type!.IsReferenceType))
+        {
+          return true;
+        }
+
+        return false;
+      }
+
+      return true;
+    }
+
+    private static bool ShouldAnnotateType(SemanticModel semanticModel, ClassDeclarationSyntax classDeclarationSyntax, TypeSyntax typeSyntax)
+    {
+      if (IsGenericClassParameter(classDeclarationSyntax, typeSyntax))
+      {
+        var constraints = GetConstraints(classDeclarationSyntax, typeSyntax);
         if (constraints.Any(c => c is ClassOrStructConstraintSyntax { ClassOrStructKeyword: { Value: "class" } })
             || constraints.OfType<TypeConstraintSyntax>().Any(c => semanticModel.GetTypeInfo(c.Type).Type!.IsReferenceType))
         {
