@@ -74,6 +74,10 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
             node.Rewrite(new MethodArgumentRewriter((b, c) => queue.Add((b, c))));
             node.Rewrite(new InheritanceParameterRewriter((b, c) => queue.Add((b, c))));
           }
+          else if (rewriteCapability == RewriteCapability.ReturnValueChange)
+          {
+            node.Rewrite(new InheritanceReturnRewriter((b, c) => queue.Add((b, c))));
+          }
         }
       }
 
