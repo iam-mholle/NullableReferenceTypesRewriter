@@ -229,7 +229,7 @@ public class SomeDerived : SomeBase
     }
 
     [Test]
-    public void InterfaceImplementation_NullableReturnValue_Nullable()
+    public void InterfaceImplementation_NullableParameterValue_Nullable()
     {
       //language=C#
       const string expected = @"
