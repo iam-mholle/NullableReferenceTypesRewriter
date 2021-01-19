@@ -371,6 +371,183 @@ public T DoStuff<T>(T obj)
       Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
     }
 
+    [Test]
+    public void MethodReturningGenericArgumentOfGenericType_WithClassConstraint_Nullable ()
+    {
+      //language=C#
+      const string expected = @"
+public T? DoStuff<T>(T obj) where T : class
+{
+  return null;
+}
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
+          "A",
+          //language=C#
+          @"
+public T DoStuff<T>(T obj) where T : class
+{
+  return null;
+}
+");
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
+      var method = CreateMethodWrapper (syntax, semantic);
+      var sut = new NullReturnRewriter((b, c) => { });
+
+      var result = sut.Rewrite (method);
+
+      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+    }
+
+    [Test]
+    public void MethodReturningGenericArgumentOfGenericType_WithReferenceTypeConstraint_Nullable ()
+    {
+      //language=C#
+      const string expected = @"
+public T? DoStuff<T>(T obj) where T : String
+{
+  return null;
+}
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
+          "A",
+          //language=C#
+          @"
+public T DoStuff<T>(T obj) where T : String
+{
+  return null;
+}
+");
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
+      var method = CreateMethodWrapper (syntax, semantic);
+      var sut = new NullReturnRewriter((b, c) => { });
+
+      var result = sut.Rewrite (method);
+
+      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+    }
+
+    [Test]
+    public void MethodReturningGenericArgumentOfGenericType_Unconstrained_Unchanged ()
+    {
+      //language=C#
+      const string expected = @"
+public T DoStuff<T>(T obj)
+{
+  return null;
+}
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
+          "A",
+          //language=C#
+          @"
+public T DoStuff<T>(T obj)
+{
+  return null;
+}
+");
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
+      var method = CreateMethodWrapper (syntax, semantic);
+      var sut = new NullReturnRewriter((b, c) => { });
+
+      var result = sut.Rewrite (method);
+
+      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+    }
+
+    [Test]
+    public void MethodReturningGenericArgumentOfGenericClassType_Unconstrained_Unchanged ()
+    {
+      //language=C#
+      const string expected = @"
+  public T DoStuff(T obj)
+  {
+    return null;
+  }
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInNameSpace(
+          "A",
+          //language=C#
+          @"
+public class A<T>
+{
+  public T DoStuff(T obj)
+  {
+    return null;
+  }
+}
+");
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
+      var method = CreateMethodWrapper (syntax, semantic);
+      var sut = new NullReturnRewriter((b, c) => { });
+
+      var result = sut.Rewrite (method);
+
+      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+    }
+
+    [Test]
+    public void MethodReturningGenericArgumentOfGenericClassType_WithClassConstraint_Nullable ()
+    {
+      //language=C#
+      const string expected = @"
+  public T? DoStuff(T obj)
+  {
+    return null;
+  }
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInNameSpace(
+          "A",
+          //language=C#
+          @"
+public class A<T> where T : class
+{
+  public T DoStuff(T obj)
+  {
+    return null;
+  }
+}
+");
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
+      var method = CreateMethodWrapper (syntax, semantic);
+      var sut = new NullReturnRewriter((b, c) => { });
+
+      var result = sut.Rewrite (method);
+
+      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+    }
+
+    [Test]
+    public void MethodReturningGenericArgumentOfGenericClassType_WithReferenceTypeConstraint_Nullable ()
+    {
+      //language=C#
+      const string expected = @"
+  public T? DoStuff(T obj)
+  {
+    return null;
+  }
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInNameSpace(
+          "A",
+          //language=C#
+          @"
+public class A<T> where T : String
+{
+  public T DoStuff(T obj)
+  {
+    return null;
+  }
+}
+");
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
+      var method = CreateMethodWrapper (syntax, semantic);
+      var sut = new NullReturnRewriter((b, c) => { });
+
+      var result = sut.Rewrite (method);
+
+      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+    }
+
     private Method CreateMethodWrapper (
         MethodDeclarationSyntax syntax,
         SemanticModel semanticModel,

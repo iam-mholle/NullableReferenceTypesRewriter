@@ -21,7 +21,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 
       if (MayReturnNull(node, semanticModel!))
       {
-        return NullUtilities.ToNullReturning (node);
+        return NullUtilities.ToNullReturning (semanticModel, node);
       }
       return node;
     }

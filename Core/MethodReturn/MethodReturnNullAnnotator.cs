@@ -33,7 +33,7 @@ namespace NullableReferenceTypesRewriter.MethodReturn
     {
       if (MayReturnNull(node, _semanticModel))
       {
-        return NullUtilities.ToNullReturning (node);
+        return NullUtilities.ToNullReturning (_semanticModel, node);
       }
       return node;
     }

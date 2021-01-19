@@ -11,8 +11,6 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -61,14 +59,12 @@ namespace NullableReferenceTypesRewriter.Utilities
              && type.Keyword.Kind() == SyntaxKind.VoidKeyword;
     }
 
-    public static MethodDeclarationSyntax ToNullReturning (MethodDeclarationSyntax method)
+    public static MethodDeclarationSyntax ToNullReturning (SemanticModel semanticModel, MethodDeclarationSyntax method)
     {
-      // TODO: Should annotate if constrained to a class.
-      // TODO: Should not annotate if it is a generic class parameter (unconstrained).
-      if (method.TypeParameterList is { } && method.TypeParameterList.Parameters.Any(tp => method.ReturnType.ToString().Equals(tp.ToString())))
-        return method;
+      if (ShouldAnnotateType(semanticModel, method, method.ReturnType))
+        return method.WithReturnType (ToNullable (method.ReturnType));
 
-      return method.WithReturnType (ToNullable (method.ReturnType));
+      return method;
     }
 
     public static TypeSyntax ToNullable (TypeSyntax typeSyntax)
@@ -78,6 +74,53 @@ namespace NullableReferenceTypesRewriter.Utilities
       var nullable = NullableType (typeSyntax.WithoutTrailingTrivia());
       return nullable
           .WithTrailingTrivia (typeSyntax.GetTrailingTrivia());
+    }
+
+    private static bool IsGenericParameter(MethodDeclarationSyntax method, TypeSyntax typeSyntax)
+    {
+      var containingClasses = method.Ancestors()
+          .Where(a => a.IsKind(SyntaxKind.ClassDeclaration))
+          .OfType<ClassDeclarationSyntax>();
+
+      return IsGenericMethodParameter(method, typeSyntax)
+             || containingClasses.Any(c => IsGenericClassParameter(c, typeSyntax));
+    }
+
+    private static bool IsGenericMethodParameter(MethodDeclarationSyntax method, TypeSyntax typeSyntax)
+    {
+      return method.TypeParameterList is { } && method.TypeParameterList.Parameters.Any(tp => typeSyntax.ToString().Equals(tp.ToString()));
+    }
+
+    private static bool IsGenericClassParameter(ClassDeclarationSyntax @class, TypeSyntax typeSyntax)
+    {
+      return @class.TypeParameterList is { } && @class.TypeParameterList.Parameters.Any(tp => typeSyntax.ToString().Equals(tp.ToString()));
+    }
+
+    private static IReadOnlyCollection<TypeParameterConstraintSyntax> GetConstraints(MethodDeclarationSyntax methodDeclarationSyntax, TypeSyntax typeSyntax)
+    {
+      var containingClasses = methodDeclarationSyntax.Ancestors()
+          .Where(a => a.IsKind(SyntaxKind.ClassDeclaration))
+          .OfType<ClassDeclarationSyntax>();
+      var classClauses = containingClasses.SelectMany(c => c.ConstraintClauses);
+
+      return methodDeclarationSyntax.ConstraintClauses.Concat(classClauses).Where(clause => clause.Name.ToString() == typeSyntax.ToString()).SelectMany(c => c.Constraints).ToArray();
+    }
+
+    private static bool ShouldAnnotateType(SemanticModel semanticModel, MethodDeclarationSyntax methodDeclarationSyntax, TypeSyntax typeSyntax)
+    {
+      if (IsGenericParameter(methodDeclarationSyntax, typeSyntax))
+      {
+        var constraints = GetConstraints(methodDeclarationSyntax, typeSyntax);
+        if (constraints.Any(c => c is ClassOrStructConstraintSyntax { ClassOrStructKeyword: { Value: "class" } })
+            || constraints.OfType<TypeConstraintSyntax>().Any(c => semanticModel.GetTypeInfo(c.Type).Type!.IsReferenceType))
+        {
+          return true;
+        }
+
+        return false;
+      }
+
+      return true;
     }
   }
 }
