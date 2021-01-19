@@ -8,7 +8,6 @@ using NullableReferenceTypesRewriter.Utilities;
 
 namespace NullableReferenceTypesRewriter.Analysis
 {
-  // TODO: Generic handling not working properly
   public class CastExpressionRewriter : RewriterBase
   {
     public CastExpressionRewriter (Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
