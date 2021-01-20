@@ -114,9 +114,34 @@ namespace NullableReferenceTypesRewriter.Analysis
       base.VisitInvocationExpression (node);
     }
 
+    public override void VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
+    {
+      var containingMethodDeclaration = node.FirstAncestorOrSelf<BaseMethodDeclarationSyntax> ();
+
+      var symbolInfoCandidate = GetSemanticModel(node).GetSymbolInfo (node);
+      if (symbolInfoCandidate.Symbol is IMethodSymbol invokedCtorSymbol && containingMethodDeclaration != null)
+      {
+        var containingMethodSymbol = GetSemanticModel(node).GetDeclaredSymbol (containingMethodDeclaration);
+
+        if (containingMethodSymbol == null) throw new InvalidOperationException();
+
+        if (invokedCtorSymbol.DeclaringSyntaxReferences.IsEmpty)
+        {
+          _graph.AddExternalMethod (UniqueSymbolNameGenerator.Generate (invokedCtorSymbol), invokedCtorSymbol);
+        }
+
+        _graph.AddDependency (
+            UniqueSymbolNameGenerator.Generate (containingMethodSymbol),
+            UniqueSymbolNameGenerator.Generate (invokedCtorSymbol),
+            DependencyType.Usage);
+      }
+
+      base.VisitObjectCreationExpression(node);
+    }
+
     public override void VisitIdentifierName (IdentifierNameSyntax node)
     {
-      var containingMethodDeclaration = node.FirstAncestorOrSelf<MethodDeclarationSyntax>();
+      var containingMethodDeclaration = node.FirstAncestorOrSelf<BaseMethodDeclarationSyntax>();
 
       if (containingMethodDeclaration != null)
       {

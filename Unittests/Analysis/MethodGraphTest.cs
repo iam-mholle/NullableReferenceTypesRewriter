@@ -39,14 +39,16 @@ public class B
 
       var methodOfA = builder.Graph.GetNode ("Test.A.DoStuff()");
       var methodOfB = builder.Graph.GetNode ("Test.B.DoMore()");
+      var ctorOfB = builder.Graph.GetNode ("Test.B.B()");
 
       Assert.That (methodOfA, Is.Not.Null);
       Assert.That (methodOfB, Is.Not.Null);
-      Assert.That (methodOfA.Children, Has.Length.EqualTo (1));
+      Assert.That (methodOfA.Children, Has.Length.EqualTo (2));
       Assert.That (methodOfA.Parents, Has.Length.EqualTo (0));
-      Assert.That (methodOfB.Children, Has.Length.EqualTo (0));
+      Assert.That (methodOfB.Children, Has.Length.EqualTo (1));
       Assert.That (methodOfB.Parents, Has.Length.EqualTo (1));
       Assert.That (methodOfA.Children.First().To, Is.SameAs (methodOfB));
+      Assert.That (methodOfA.Children.Last().To, Is.SameAs (ctorOfB));
       Assert.That (methodOfB.Parents.First().From, Is.SameAs (methodOfA));
     }
 
