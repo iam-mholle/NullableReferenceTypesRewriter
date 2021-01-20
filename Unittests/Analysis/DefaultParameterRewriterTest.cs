@@ -173,7 +173,7 @@ public void DoStuff(IReadOnlyCollection<string> value = default)
     {
       //language=C#
       const string expected = @"
-public void DoStuff(string? value = default(string))
+public void DoStuff(string? value = default(string?))
 {
 }
 ";

@@ -7,7 +7,6 @@ using NullableReferenceTypesRewriter.Utilities;
 
 namespace NullableReferenceTypesRewriter.Analysis
 {
-  // TODO: if DefaultExpressionSyntax is used, also adapt passed type
   public class DefaultParameterRewriter : RewriterBase
   {
     public DefaultParameterRewriter(Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
@@ -32,12 +31,18 @@ namespace NullableReferenceTypesRewriter.Analysis
 
       var res = node.ParameterList;
 
-      foreach (var parameter in node.ParameterList.Parameters)
+      foreach (var (parameter, index) in node.ParameterList.Parameters.Select((p, i) => (p, i)))
       {
-        if (IsParameterDefaultNull(parameter)
-            || IsParameterDefaultDefault(semanticModel, parameter))
+        if (IsParameterDefaultNullLiteral(parameter)
+            || IsParameterDefaultDefaultLiteral(semanticModel, parameter))
         {
           res = res.ReplaceNode(parameter.Type!, NullUtilities.ToNullable(parameter.Type!));
+        }
+        else if (IsParameterDefaultDefaultExpression(semanticModel, parameter))
+        {
+          res = res.ReplaceNode(parameter.Type!, NullUtilities.ToNullable(parameter.Type!));
+          var defaultExpression = (DefaultExpressionSyntax) res.Parameters[index].Default!.Value;
+          res = res.ReplaceNode(defaultExpression.Type!, NullUtilities.ToNullable(defaultExpression.Type!));
         }
       }
 
@@ -53,12 +58,15 @@ namespace NullableReferenceTypesRewriter.Analysis
           .ToArray();
     }
 
-    private static bool IsParameterDefaultNull(ParameterSyntax parameterSyntax)
+    private static bool IsParameterDefaultNullLiteral(ParameterSyntax parameterSyntax)
       => parameterSyntax.Default is { Value: LiteralExpressionSyntax { Token: { Text: "null" } } };
 
-    private static bool IsParameterDefaultDefault(SemanticModel semanticModel, ParameterSyntax parameterSyntax)
+    private static bool IsParameterDefaultDefaultLiteral(SemanticModel semanticModel, ParameterSyntax parameterSyntax)
       => semanticModel.GetTypeInfo(parameterSyntax.Type!).Type!.IsReferenceType
-         && (parameterSyntax.Default is { Value: LiteralExpressionSyntax { Token: { Text: "default" } } }
-             || parameterSyntax.Default is { Value: DefaultExpressionSyntax _ });
+         && parameterSyntax.Default is { Value: LiteralExpressionSyntax { Token: { Text: "default" } } };
+
+    private static bool IsParameterDefaultDefaultExpression(SemanticModel semanticModel, ParameterSyntax parameterSyntax)
+      => semanticModel.GetTypeInfo(parameterSyntax.Type!).Type!.IsReferenceType
+         && parameterSyntax.Default is { Value: DefaultExpressionSyntax _ };
   }
 }
