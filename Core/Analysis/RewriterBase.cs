@@ -16,6 +16,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     protected Method CurrentMethod = null!;
     protected Field CurrentField = null!;
+    protected Property CurrentProperty = null!;
 
     protected RewriterBase (Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
     {
@@ -35,6 +36,23 @@ namespace NullableReferenceTypesRewriter.Analysis
         return field.RewritableSyntaxNode;
 
       _additionalRewrites (this, GetAdditionalRewrites (field));
+
+      return rewritten;
+    }
+
+    public SyntaxNode Rewrite (Property property)
+    {
+      CurrentProperty = property;
+
+      var rewritten = VisitPropertyDeclaration ((PropertyDeclarationSyntax) property.RewritableSyntaxNode);
+
+      if (rewritten == null)
+        throw new InvalidOperationException ("Could not rewrite property.");
+
+      if (rewritten == property.RewritableSyntaxNode)
+        return property.RewritableSyntaxNode;
+
+      _additionalRewrites (this, GetAdditionalRewrites (property));
 
       return rewritten;
     }
@@ -67,6 +85,11 @@ namespace NullableReferenceTypesRewriter.Analysis
     }
 
     protected virtual IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites (Method method)
+    {
+      return Array.Empty<(IRewritable, RewriteCapability)>();
+    }
+
+    protected virtual IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites (Property property)
     {
       return Array.Empty<(IRewritable, RewriteCapability)>();
     }

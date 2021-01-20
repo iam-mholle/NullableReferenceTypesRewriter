@@ -31,6 +31,11 @@ namespace NullableReferenceTypesRewriter.Analysis
       VisitParents (field);
     }
 
+    public override void VisitProperty(Property property)
+    {
+      VisitParents(property);
+    }
+
     private void VisitParents (INode node)
     {
       foreach (var parent in node.Parents)

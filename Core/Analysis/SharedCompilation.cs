@@ -89,6 +89,20 @@ namespace NullableReferenceTypesRewriter.Analysis
           .Single().FirstAncestorOrSelf<FieldDeclarationSyntax>()!;
     }
 
+    public PropertyDeclarationSyntax GetPropertyDeclarationSyntax(string filePath, string signature)
+    {
+      Console.WriteLine($"Querying the MethodDeclarationSyntax of '{signature}' in '{filePath}'.");
+      return _compilation.SyntaxTrees
+          .Where (t => t.FilePath == filePath)
+          .SelectMany (
+              t =>
+                  t.GetRoot()
+                      .DescendantNodes (_ => true)
+                      .OfType<PropertyDeclarationSyntax>()
+                      .Where (n => NullabilityTrimmingEquals(_compilation.GetSemanticModel (t).GetDeclaredSymbol (n)!.ToDisplayStringWithStaticModifier(),signature)))
+          .Single();
+    }
+
     private static bool NullabilityTrimmingEquals (string a, string b)
     {
       return a.Replace ("?", "") == b.Replace ("?", "");
