@@ -7,6 +7,7 @@ using NullableReferenceTypesRewriter.Utilities;
 
 namespace NullableReferenceTypesRewriter.Analysis
 {
+  // TODO: if DefaultExpressionSyntax is used, also adapt passed type
   public class DefaultParameterRewriter : RewriterBase
   {
     public DefaultParameterRewriter(Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
