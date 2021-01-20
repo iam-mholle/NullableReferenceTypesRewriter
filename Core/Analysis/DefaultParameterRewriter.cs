@@ -36,11 +36,11 @@ namespace NullableReferenceTypesRewriter.Analysis
         if (IsParameterDefaultNullLiteral(parameter)
             || IsParameterDefaultDefaultLiteral(semanticModel, parameter))
         {
-          res = res.ReplaceNode(parameter.Type!, NullUtilities.ToNullable(parameter.Type!));
+          res = res.ReplaceNode(res.Parameters[index].Type!, NullUtilities.ToNullable(parameter.Type!));
         }
         else if (IsParameterDefaultDefaultExpression(semanticModel, parameter))
         {
-          res = res.ReplaceNode(parameter.Type!, NullUtilities.ToNullable(parameter.Type!));
+          res = res.ReplaceNode(res.Parameters[index].Type!, NullUtilities.ToNullable(parameter.Type!));
           var defaultExpression = (DefaultExpressionSyntax) res.Parameters[index].Default!.Value;
           res = res.ReplaceNode(defaultExpression.Type!, NullUtilities.ToNullable(defaultExpression.Type!));
         }
