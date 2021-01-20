@@ -20,6 +20,17 @@ namespace NullableReferenceTypesRewriter.Analysis
       _graph = new MethodGraph(compilation);
     }
 
+    public override void VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
+    {
+      var symbol = GetSemanticModel(node).GetDeclaredSymbol (node);
+
+      if (symbol == null) throw new InvalidOperationException();
+
+      _graph.AddMethod(UniqueSymbolNameGenerator.Generate(symbol), symbol);
+
+      base.VisitConstructorDeclaration(node);
+    }
+
     public override void VisitMethodDeclaration (MethodDeclarationSyntax node)
     {
       var symbol = GetSemanticModel(node).GetDeclaredSymbol (node);
@@ -80,7 +91,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     public override void VisitInvocationExpression (InvocationExpressionSyntax node)
     {
-      var containingMethodDeclaration = node.FirstAncestorOrSelf<MethodDeclarationSyntax> ();
+      var containingMethodDeclaration = node.FirstAncestorOrSelf<BaseMethodDeclarationSyntax> ();
 
       var symbolInfoCandidate = GetSemanticModel(node).GetSymbolInfo (node.Expression);
       if (symbolInfoCandidate.Symbol is IMethodSymbol invokedMethodSymbol && containingMethodDeclaration != null)
