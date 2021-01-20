@@ -43,6 +43,13 @@ namespace NullableReferenceTypesRewriter.Analysis
       _members[uniqueName] = field;
     }
 
+    public void AddProperty(string uniqueName, IPropertySymbol symbol)
+    {
+      var property = new Property(_compilation, symbol, CreateParentGetter(uniqueName), CreateChildrenGetter(uniqueName));
+
+      _members[uniqueName] = property;
+    }
+
     public void AddDependency (string fromMethodSymbol, string toMethodSymbol, DependencyType dependencyType)
     {
       var dependency = new Dependency (

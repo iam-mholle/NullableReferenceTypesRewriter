@@ -142,6 +142,7 @@ namespace NullableReferenceTypesRewriter.Analysis
     public override void VisitIdentifierName (IdentifierNameSyntax node)
     {
       var containingMethodDeclaration = node.FirstAncestorOrSelf<BaseMethodDeclarationSyntax>();
+      var containingPropertyDeclaration = node.FirstAncestorOrSelf<PropertyDeclarationSyntax>();
 
       if (containingMethodDeclaration != null)
       {
@@ -155,6 +156,13 @@ namespace NullableReferenceTypesRewriter.Analysis
           _graph.AddDependency(
               UniqueSymbolNameGenerator.Generate(containingMethodSymbol),
               UniqueSymbolNameGenerator.Generate(fieldSymbol),
+              DependencyType.Usage);
+        }
+        else if (symbolInfoCandidate.Symbol is IPropertySymbol propertySymbol)
+        {
+          _graph.AddDependency(
+              UniqueSymbolNameGenerator.Generate(containingMethodSymbol),
+              UniqueSymbolNameGenerator.Generate(propertySymbol),
               DependencyType.Usage);
         }
       }
@@ -175,6 +183,17 @@ namespace NullableReferenceTypesRewriter.Analysis
       }
 
       base.VisitFieldDeclaration (node);
+    }
+
+    public override void VisitPropertyDeclaration(PropertyDeclarationSyntax node)
+    {
+      var symbol = GetSemanticModel(node).GetDeclaredSymbol (node);
+
+      if (symbol == null) throw new InvalidOperationException();
+
+      _graph.AddProperty(UniqueSymbolNameGenerator.Generate(symbol), symbol);
+
+      base.VisitPropertyDeclaration(node);
     }
   }
 }

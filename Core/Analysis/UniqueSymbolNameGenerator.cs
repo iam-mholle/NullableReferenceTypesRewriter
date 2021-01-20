@@ -14,5 +14,10 @@ namespace NullableReferenceTypesRewriter.Analysis
     {
       return fieldSymbol.ToString();
     }
+
+    public static string Generate (IPropertySymbol propertySymbol)
+    {
+      return propertySymbol.ToString();
+    }
   }
 }
