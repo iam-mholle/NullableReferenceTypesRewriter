@@ -20,14 +20,14 @@ namespace NullableReferenceTypesRewriter.Analysis
       if (node.ParameterList.Parameters.Count == 0)
         return node;
 
-      var inheritors = CurrentMethod.Children
+      var parents = CurrentMethod.Parents
           .Where(d => d.DependencyType == DependencyType.Inheritance)
-          .Select(d => d.To)
+          .Select(d => d.From)
           .OfType<Method>();
 
       var res = node.ParameterList.Parameters
           .Select((_, i) => i)
-          .Where(i => inheritors.Any(m => IsParameterNullable(m, i)))
+          .Where(i => parents.Any(m => IsParameterNullable(m, i)))
           .ToArray();
 
       var newList = node.ParameterList;
@@ -55,8 +55,8 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(Method method)
     {
-      return method.Parents
-          .Select(p => p.From)
+      return method.Children
+          .Select(p => p.To)
           .OfType<IRewritable>()
           .Select(r => (r, RewriteCapability.ParameterChange))
           .ToArray();

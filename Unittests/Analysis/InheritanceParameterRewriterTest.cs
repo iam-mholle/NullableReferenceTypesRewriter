@@ -17,52 +17,15 @@ namespace NullableReferenceTypesRewriter.UnitTests.Analysis
     {
       //language=C#
       const string expected = @"
-  public abstract void DoStuff(string? value);
-";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInNameSpace(
-          "A",
-          //language=C#
-          @"
-public class SomeBase
-{
-  public abstract void DoStuff(string value);
-}
-public class SomeDerived : SomeBase
-{
   public override void DoStuff(string? value)
   {
     // Something
   }
-}
-");
-      Method method = null!;
-      var derivedSyntax = (MethodDeclarationSyntax) root.DescendantNodes ().Last(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var derivedMethod = CreateMethodWrapper(derivedSyntax, semantic);
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var dependency = new Dependency(() => method, () => derivedMethod, DependencyType.Inheritance);
-      method = CreateMethodWrapper(syntax, semantic, null, () => new[] { dependency });
-      var sut = new InheritanceParameterRewriter((b, c) => { });
-
-      var result = sut.Rewrite (method);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
-    }
-
-    [Test]
-    public void AbstractOverride_OverriddenParameterNonNullable_Unchanged()
-    {
-      //language=C#
-      const string expected = @"
-  public abstract void DoStuff(string value);
 ";
       var (semantic, root) = CompiledSourceFileProvider.CompileInNameSpace(
           "A",
           //language=C#
           @"
-public class SomeBase
-{
-  public abstract void DoStuff(string value);
-}
 public class SomeDerived : SomeBase
 {
   public override void DoStuff(string value)
@@ -70,18 +33,61 @@ public class SomeDerived : SomeBase
     // Something
   }
 }
+public class SomeBase
+{
+  public abstract void DoStuff(string? value);
+}
 ");
       Method method = null!;
-      var derivedSyntax = (MethodDeclarationSyntax) root.DescendantNodes ().Last(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var derivedMethod = CreateMethodWrapper(derivedSyntax, semantic);
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var dependency = new Dependency(() => method, () => derivedMethod, DependencyType.Inheritance);
-      method = CreateMethodWrapper(syntax, semantic, null, () => new[] { dependency });
+      var baseSyntax = (MethodDeclarationSyntax) root.DescendantNodes().Last(n => n.IsKind(SyntaxKind.MethodDeclaration));
+      var baseMethod = CreateMethodWrapper(baseSyntax, semantic);
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes().First(n => n.IsKind(SyntaxKind.MethodDeclaration));
+      var dependency = new Dependency(() => baseMethod, () => method, DependencyType.Inheritance);
+      method = CreateMethodWrapper(syntax, semantic, () => new[] { dependency });
       var sut = new InheritanceParameterRewriter((b, c) => { });
 
-      var result = sut.Rewrite (method);
+      var result = sut.Rewrite(method);
 
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+      Assert.That(result.ToString().Trim(), Is.EqualTo(expected.Trim()));
+    }
+
+    [Test]
+    public void AbstractOverride_OverriddenParameterNonNullable_Unchanged()
+    {
+      //language=C#
+      const string expected = @"
+  public override void DoStuff(string value)
+  {
+    // Something
+  }
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInNameSpace(
+          "A",
+          //language=C#
+          @"
+public class SomeDerived : SomeBase
+{
+  public override void DoStuff(string value)
+  {
+    // Something
+  }
+}
+public class SomeBase
+{
+  public abstract void DoStuff(string value);
+}
+");
+      Method method = null!;
+      var baseSyntax = (MethodDeclarationSyntax) root.DescendantNodes().Last(n => n.IsKind(SyntaxKind.MethodDeclaration));
+      var baseMethod = CreateMethodWrapper(baseSyntax, semantic);
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes().First(n => n.IsKind(SyntaxKind.MethodDeclaration));
+      var dependency = new Dependency(() => baseMethod, () => method, DependencyType.Inheritance);
+      method = CreateMethodWrapper(syntax, semantic, () => new[] { dependency });
+      var sut = new InheritanceParameterRewriter((b, c) => { });
+
+      var result = sut.Rewrite(method);
+
+      Assert.That(result.ToString().Trim(), Is.EqualTo(expected.Trim()));
     }
 
     [Test]
@@ -89,16 +95,15 @@ public class SomeDerived : SomeBase
     {
       //language=C#
       const string expected = @"
-  public abstract void DoStuff(string? value);
+  public override void DoStuff(string? value)
+  {
+    // Something
+  }
 ";
       var (semantic, root) = CompiledSourceFileProvider.CompileInNameSpace(
           "A",
           //language=C#
           @"
-public class SomeBase
-{
-  public abstract void DoStuff(string? value);
-}
 public class SomeDerived : SomeBase
 {
   public override void DoStuff(string? value)
@@ -106,18 +111,22 @@ public class SomeDerived : SomeBase
     // Something
   }
 }
+public class SomeBase
+{
+  public abstract void DoStuff(string? value);
+}
 ");
       Method method = null!;
-      var derivedSyntax = (MethodDeclarationSyntax) root.DescendantNodes ().Last(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var derivedMethod = CreateMethodWrapper(derivedSyntax, semantic);
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var dependency = new Dependency(() => method, () => derivedMethod, DependencyType.Inheritance);
-      method = CreateMethodWrapper(syntax, semantic, null, () => new[] { dependency });
+      var baseSyntax = (MethodDeclarationSyntax) root.DescendantNodes().Last(n => n.IsKind(SyntaxKind.MethodDeclaration));
+      var baseMethod = CreateMethodWrapper(baseSyntax, semantic);
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes().First(n => n.IsKind(SyntaxKind.MethodDeclaration));
+      var dependency = new Dependency(() => baseMethod, () => method, DependencyType.Inheritance);
+      method = CreateMethodWrapper(syntax, semantic, () => new[] { dependency });
       var sut = new InheritanceParameterRewriter((b, c) => { });
 
-      var result = sut.Rewrite (method);
+      var result = sut.Rewrite(method);
 
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+      Assert.That(result.ToString().Trim(), Is.EqualTo(expected.Trim()));
     }
 
     [Test]
@@ -125,16 +134,15 @@ public class SomeDerived : SomeBase
     {
       //language=C#
       const string expected = @"
-  public abstract void DoStuff(int? value);
+  public override void DoStuff(int? value)
+  {
+    // Something
+  }
 ";
       var (semantic, root) = CompiledSourceFileProvider.CompileInNameSpace(
           "A",
           //language=C#
           @"
-public class SomeBase
-{
-  public abstract void DoStuff(int? value);
-}
 public class SomeDerived : SomeBase
 {
   public override void DoStuff(int? value)
@@ -142,18 +150,22 @@ public class SomeDerived : SomeBase
     // Something
   }
 }
+public class SomeBase
+{
+  public abstract void DoStuff(int? value);
+}
 ");
       Method method = null!;
-      var derivedSyntax = (MethodDeclarationSyntax) root.DescendantNodes ().Last(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var derivedMethod = CreateMethodWrapper(derivedSyntax, semantic);
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var dependency = new Dependency(() => method, () => derivedMethod, DependencyType.Inheritance);
-      method = CreateMethodWrapper(syntax, semantic, null, () => new[] { dependency });
+      var baseSyntax = (MethodDeclarationSyntax) root.DescendantNodes().Last(n => n.IsKind(SyntaxKind.MethodDeclaration));
+      var baseMethod = CreateMethodWrapper(baseSyntax, semantic);
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes().First(n => n.IsKind(SyntaxKind.MethodDeclaration));
+      var dependency = new Dependency(() => baseMethod, () => method, DependencyType.Inheritance);
+      method = CreateMethodWrapper(syntax, semantic, () => new[] { dependency });
       var sut = new InheritanceParameterRewriter((b, c) => { });
 
-      var result = sut.Rewrite (method);
+      var result = sut.Rewrite(method);
 
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+      Assert.That(result.ToString().Trim(), Is.EqualTo(expected.Trim()));
     }
 
     [Test]
@@ -161,35 +173,38 @@ public class SomeDerived : SomeBase
     {
       //language=C#
       const string expected = @"
-  public abstract void DoStuff(string? value1, string value2, string? value3);
+  public override void DoStuff(string? value1, string value2, string? value3)
+  {
+    // Something
+  }
 ";
       var (semantic, root) = CompiledSourceFileProvider.CompileInNameSpace(
           "A",
           //language=C#
           @"
-public class SomeBase
-{
-  public abstract void DoStuff(string value1, string value2, string value3);
-}
 public class SomeDerived : SomeBase
 {
-  public override void DoStuff(string? value1, string value2, string? value3)
+  public override void DoStuff(string value1, string value2, string value3)
   {
     // Something
   }
 }
+public class SomeBase
+{
+  public abstract void DoStuff(string? value1, string value2, string? value3);
+}
 ");
       Method method = null!;
-      var derivedSyntax = (MethodDeclarationSyntax) root.DescendantNodes ().Last(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var derivedMethod = CreateMethodWrapper(derivedSyntax, semantic);
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var dependency = new Dependency(() => method, () => derivedMethod, DependencyType.Inheritance);
-      method = CreateMethodWrapper(syntax, semantic, null, () => new[] { dependency });
+      var baseSyntax = (MethodDeclarationSyntax) root.DescendantNodes().Last(n => n.IsKind(SyntaxKind.MethodDeclaration));
+      var baseMethod = CreateMethodWrapper(baseSyntax, semantic);
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes().First(n => n.IsKind(SyntaxKind.MethodDeclaration));
+      var dependency = new Dependency(() => baseMethod, () => method, DependencyType.Inheritance);
+      method = CreateMethodWrapper(syntax, semantic, () => new[] { dependency });
       var sut = new InheritanceParameterRewriter((b, c) => { });
 
-      var result = sut.Rewrite (method);
+      var result = sut.Rewrite(method);
 
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+      Assert.That(result.ToString().Trim(), Is.EqualTo(expected.Trim()));
     }
 
     [Test]
@@ -197,35 +212,38 @@ public class SomeDerived : SomeBase
     {
       //language=C#
       const string expected = @"
-  public abstract void DoStuff(string? value = null);
+  public override void DoStuff(string? value = null)
+  {
+    // Something
+  }
 ";
       var (semantic, root) = CompiledSourceFileProvider.CompileInNameSpace(
           "A",
           //language=C#
           @"
-public class SomeBase
-{
-  public abstract void DoStuff(string value = null);
-}
 public class SomeDerived : SomeBase
 {
-  public override void DoStuff(string? value = null)
+  public override void DoStuff(string value = null)
   {
     // Something
   }
 }
+public class SomeBase
+{
+  public abstract void DoStuff(string? value = null);
+}
 ");
       Method method = null!;
-      var derivedSyntax = (MethodDeclarationSyntax) root.DescendantNodes ().Last(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var derivedMethod = CreateMethodWrapper(derivedSyntax, semantic);
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var dependency = new Dependency(() => method, () => derivedMethod, DependencyType.Inheritance);
-      method = CreateMethodWrapper(syntax, semantic, null, () => new[] { dependency });
+      var baseSyntax = (MethodDeclarationSyntax) root.DescendantNodes().Last(n => n.IsKind(SyntaxKind.MethodDeclaration));
+      var baseMethod = CreateMethodWrapper(baseSyntax, semantic);
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes().First(n => n.IsKind(SyntaxKind.MethodDeclaration));
+      var dependency = new Dependency(() => baseMethod, () => method, DependencyType.Inheritance);
+      method = CreateMethodWrapper(syntax, semantic, () => new[] { dependency });
       var sut = new InheritanceParameterRewriter((b, c) => { });
 
-      var result = sut.Rewrite (method);
+      var result = sut.Rewrite(method);
 
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+      Assert.That(result.ToString().Trim(), Is.EqualTo(expected.Trim()));
     }
 
     [Test]
@@ -233,38 +251,41 @@ public class SomeDerived : SomeBase
     {
       //language=C#
       const string expected = @"
-  void DoStuff(string? value);
+  public override void DoStuff(string? value)
+  {
+    // Something
+  }
 ";
       var (semantic, root) = CompiledSourceFileProvider.CompileInNameSpace(
           "A",
           //language=C#
           @"
-public class ISomething
-{
-  void DoStuff(string value);
-}
 public class Something : ISomething
 {
-  public override void DoStuff(string? value)
+  public override void DoStuff(string value)
   {
     // Something
   }
 }
+public class ISomething
+{
+  void DoStuff(string? value);
+}
 ");
       Method method = null!;
-      var derivedSyntax = (MethodDeclarationSyntax) root.DescendantNodes ().Last(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var derivedMethod = CreateMethodWrapper(derivedSyntax, semantic);
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var dependency = new Dependency(() => method, () => derivedMethod, DependencyType.Inheritance);
-      method = CreateMethodWrapper(syntax, semantic, null, () => new[] { dependency });
+      var baseSyntax = (MethodDeclarationSyntax) root.DescendantNodes().Last(n => n.IsKind(SyntaxKind.MethodDeclaration));
+      var baseMethod = CreateMethodWrapper(baseSyntax, semantic);
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes().First(n => n.IsKind(SyntaxKind.MethodDeclaration));
+      var dependency = new Dependency(() => baseMethod, () => method, DependencyType.Inheritance);
+      method = CreateMethodWrapper(syntax, semantic, () => new[] { dependency });
       var sut = new InheritanceParameterRewriter((b, c) => { });
 
-      var result = sut.Rewrite (method);
+      var result = sut.Rewrite(method);
 
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+      Assert.That(result.ToString().Trim(), Is.EqualTo(expected.Trim()));
     }
 
-    private Method CreateMethodWrapper (
+    private Method CreateMethodWrapper(
         MethodDeclarationSyntax syntax,
         SemanticModel semanticModel,
         Func<IReadOnlyCollection<Dependency>>? parents = null,
