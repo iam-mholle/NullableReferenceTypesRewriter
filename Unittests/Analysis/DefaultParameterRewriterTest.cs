@@ -142,6 +142,110 @@ public void DoStuff(IReadOnlyCollection<string> value = null)
       Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
     }
 
+    [Test]
+    public void InterfaceDefaultParameter_Default_Nullable()
+    {
+      //language=C#
+      const string expected = @"
+public void DoStuff(IReadOnlyCollection<string>? value = default)
+{
+}
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
+          "A",
+          //language=C#
+          @"
+public void DoStuff(IReadOnlyCollection<string> value = default)
+{
+}
+");
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
+      var method = CreateMethodWrapper (syntax, semantic);
+      var sut = new DefaultParameterRewriter((b, c) => { });
+
+      var result = sut.Rewrite (method);
+
+      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+    }
+
+    [Test]
+    public void ReferenceTypeDefaultParameter_ExplicitDefault_Nullable()
+    {
+      //language=C#
+      const string expected = @"
+public void DoStuff(string? value = default(string))
+{
+}
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
+          "A",
+          //language=C#
+          @"
+public void DoStuff(string value = default(string))
+{
+}
+");
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
+      var method = CreateMethodWrapper (syntax, semantic);
+      var sut = new DefaultParameterRewriter((b, c) => { });
+
+      var result = sut.Rewrite (method);
+
+      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+    }
+
+    [Test]
+    public void StringDefaultParameter_StringWithDefaultText_Unchanged()
+    {
+      //language=C#
+      const string expected = @"
+public void DoStuff(string value = ""default"")
+{
+}
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
+          "A",
+          //language=C#
+          @"
+public void DoStuff(string value = ""default"")
+{
+}
+");
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
+      var method = CreateMethodWrapper (syntax, semantic);
+      var sut = new DefaultParameterRewriter((b, c) => { });
+
+      var result = sut.Rewrite (method);
+
+      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+    }
+
+    [Test]
+    public void StringDefaultParameter_StringWithNullText_Unchanged()
+    {
+      //language=C#
+      const string expected = @"
+public void DoStuff(string value = ""null"")
+{
+}
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
+          "A",
+          //language=C#
+          @"
+public void DoStuff(string value = ""null"")
+{
+}
+");
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
+      var method = CreateMethodWrapper (syntax, semantic);
+      var sut = new DefaultParameterRewriter((b, c) => { });
+
+      var result = sut.Rewrite (method);
+
+      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+    }
+
     private Method CreateMethodWrapper (
         BaseMethodDeclarationSyntax syntax,
         SemanticModel semanticModel,
