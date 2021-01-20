@@ -22,7 +22,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     public override string ToString ()
     {
-      return Symbol.ToDisplayString();
+      return Symbol.ToDisplayStringWithStaticModifier();
     }
   }
 }

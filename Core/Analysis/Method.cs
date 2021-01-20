@@ -28,7 +28,7 @@ namespace NullableReferenceTypesRewriter.Analysis
         Func<IReadOnlyCollection<Dependency>> children)
     {
       _filePath = methodSymbol.DeclaringSyntaxReferences.Single().SyntaxTree.FilePath;
-      _signature = methodSymbol.ToDisplayString();
+      _signature = methodSymbol.ToDisplayStringWithStaticModifier();
       _compilation = compilation;
       _parents = parents;
       _children = children;

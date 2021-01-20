@@ -63,6 +63,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     public BaseMethodDeclarationSyntax GetMethodDeclarationSyntax (string filePath, string signature)
     {
+      Console.WriteLine($"Querying the MethodDeclarationSyntax of '{signature}' in '{filePath}'.");
       return _compilation.SyntaxTrees
           .Where (t => t.FilePath == filePath)
           .SelectMany (
@@ -70,7 +71,7 @@ namespace NullableReferenceTypesRewriter.Analysis
                   t.GetRoot()
                       .DescendantNodes (_ => true)
                       .OfType<BaseMethodDeclarationSyntax>()
-                      .Where (n => NullabilityTrimmingEquals(_compilation.GetSemanticModel (t).GetDeclaredSymbol (n)!.ToDisplayString(),signature)))
+                      .Where (n => NullabilityTrimmingEquals(_compilation.GetSemanticModel (t).GetDeclaredSymbol (n)!.ToDisplayStringWithStaticModifier(),signature)))
           .Single();
     }
 
@@ -84,7 +85,7 @@ namespace NullableReferenceTypesRewriter.Analysis
                       .DescendantNodes (_ => true)
                       .OfType<VariableDeclaratorSyntax>()
                       .Where (n => n.FirstAncestorOrSelf<FieldDeclarationSyntax>() != null)
-                      .Where (n => NullabilityTrimmingEquals(_compilation.GetSemanticModel (t).GetDeclaredSymbol (n)!.ToDisplayString(),signature)))
+                      .Where (n => NullabilityTrimmingEquals(_compilation.GetSemanticModel (t).GetDeclaredSymbol (n)!.ToDisplayStringWithStaticModifier(),signature)))
           .Single().FirstAncestorOrSelf<FieldDeclarationSyntax>()!;
     }
 

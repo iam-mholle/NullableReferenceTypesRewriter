@@ -23,7 +23,7 @@ namespace NullableReferenceTypesRewriter.Analysis
     public Field (SharedCompilation compilation, IFieldSymbol fieldSymbol, Func<IReadOnlyCollection<Dependency>> parents)
     {
       _filePath = fieldSymbol.DeclaringSyntaxReferences.Single().SyntaxTree.FilePath;
-      _signature = fieldSymbol.ToDisplayString();
+      _signature = fieldSymbol.ToDisplayStringWithStaticModifier();
       _compilation = compilation;
       _parents = parents;
     }
