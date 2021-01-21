@@ -31,6 +31,9 @@ namespace NullableReferenceTypesRewriter.Analysis
       if (IsInitializedToNull(semanticModel, node))
         return node.WithType(NullUtilities.ToNullable(node.Type));
 
+      if (node.Ancestors().FirstOrDefault(a => a.IsKind(SyntaxKind.InterfaceDeclaration)) != null)
+        return node;
+
       var classSyntax = (ClassDeclarationSyntax) node.Ancestors().First(a => a.IsKind(SyntaxKind.ClassDeclaration));
       var constructors = classSyntax.ChildNodes()
           .Where(n => n.IsKind(SyntaxKind.ConstructorDeclaration))
@@ -56,7 +59,11 @@ namespace NullableReferenceTypesRewriter.Analysis
         return false;
 
       var thisConstructorSymbol = semanticModel.GetSymbolInfo(constructor.Initializer).Symbol ?? throw new InvalidOperationException();
-      var thisConstructorSyntax = (ConstructorDeclarationSyntax) thisConstructorSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
+
+      if (thisConstructorSymbol.DeclaringSyntaxReferences.IsEmpty)
+        return false;
+
+      var thisConstructorSyntax = (ConstructorDeclarationSyntax) thisConstructorSymbol.DeclaringSyntaxReferences.First().GetSyntax();
 
       return PropertyInitializedToNotNullInCtorChain(semanticModel, thisConstructorSyntax, property);
     }
@@ -66,7 +73,11 @@ namespace NullableReferenceTypesRewriter.Analysis
       var assignments = constructor.DescendantNodesAndSelf().OfType<AssignmentExpressionSyntax>().ToArray();
 
       var propertySymbol = semanticModel.GetDeclaredSymbol(property);
-      var propertyAssignments = assignments.Where(a => SymbolEqualityComparer.Default.Equals(semanticModel.GetSymbolInfo(a.Left).Symbol, propertySymbol)).ToArray();
+      var propertyAssignments = assignments
+          .Where(a =>
+              semanticModel.SyntaxTree.GetRoot().Contains(a.Left)
+              && SymbolEqualityComparer.Default.Equals(semanticModel.GetSymbolInfo(a.Left).Symbol, propertySymbol))
+          .ToArray();
 
       if (propertyAssignments.Length == 0)
       {
