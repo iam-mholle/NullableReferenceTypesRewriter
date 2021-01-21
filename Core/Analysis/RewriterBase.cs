@@ -10,6 +10,7 @@ namespace NullableReferenceTypesRewriter.Analysis
   // TODO: Integrate properties.
   // TODO: Integrate events.
   // TODO: Document rewriter capabilities thoroughly.
+  // TODO: Don't Annotate [NotNull] parameters or return types, output error instead.
   public abstract class RewriterBase : CSharpSyntaxRewriter
   {
     private readonly Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> _additionalRewrites;

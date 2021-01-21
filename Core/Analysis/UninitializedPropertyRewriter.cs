@@ -8,6 +8,8 @@ using NullableReferenceTypesRewriter.Utilities;
 
 namespace NullableReferenceTypesRewriter.Analysis
 {
+  // TODO: Array annotation is not working
+  // TODO: InheritancePropertyRewriter (downward propagation)
   public class UninitializedPropertyRewriter : RewriterBase
   {
     public UninitializedPropertyRewriter(Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
