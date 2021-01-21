@@ -29,11 +29,11 @@ namespace NullableReferenceTypesRewriter.Rewriters
           : node;
     }
 
-    protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites (Method method)
+    protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites (INode node)
     {
-      return method.Parents.Select(p => p.From).OfType<IRewritable>()
+      return node.Parents.Select(p => p.From).OfType<IRewritable>()
           .Select(r => (r, RewriteCapability.ReturnValueChange))
-          .Concat(method.Children
+          .Concat(node.Children
               .Select(c => c.To)
               .OfType<IRewritable>()
               .Select(r => (r, RewriteCapability.ParameterChange)))

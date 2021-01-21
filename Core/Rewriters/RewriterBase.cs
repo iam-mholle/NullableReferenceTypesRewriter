@@ -82,17 +82,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
       return rewritten;
     }
 
-    protected virtual IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites (Field field)
-    {
-      return Array.Empty<(IRewritable, RewriteCapability)>();
-    }
-
-    protected virtual IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites (Method method)
-    {
-      return Array.Empty<(IRewritable, RewriteCapability)>();
-    }
-
-    protected virtual IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites (Property property)
+    protected virtual IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites (INode node)
     {
       return Array.Empty<(IRewritable, RewriteCapability)>();
     }

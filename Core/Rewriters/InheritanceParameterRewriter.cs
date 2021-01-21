@@ -53,7 +53,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
       return syntax.ParameterList.Parameters[argumentIndex].Type is NullableTypeSyntax;
     }
 
-    protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(Method method)
+    protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(INode method)
     {
       return method.Children
           .Select(p => p.To)

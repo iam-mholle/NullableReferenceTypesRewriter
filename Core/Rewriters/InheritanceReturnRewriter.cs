@@ -41,7 +41,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
       return syntax is MethodDeclarationSyntax { ReturnType: NullableTypeSyntax _ };
     }
 
-    protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(Method method)
+    protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(INode method)
     {
       return method.Parents
           .Select(p => p.From)

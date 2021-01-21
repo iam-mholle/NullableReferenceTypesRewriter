@@ -1,0 +1,56 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using NullableReferenceTypesRewriter.Analysis;
+using NullableReferenceTypesRewriter.Utilities;
+
+namespace NullableReferenceTypesRewriter.Rewriters
+{
+  public class PropertyNullReturnRewriter : RewriterBase
+  {
+    public PropertyNullReturnRewriter(Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
+        : base(additionalRewrites)
+    {
+    }
+
+    public override SyntaxNode? VisitPropertyDeclaration(PropertyDeclarationSyntax node)
+    {
+      var semanticModel = CurrentProperty.SemanticModel;
+
+      if (node.IsExpressionBodied() && NullUtilities.CanBeNull(node.ExpressionBody!.Expression, semanticModel))
+      {
+        var containingClass = node.FirstAncestorOrSelf<ClassDeclarationSyntax>();
+        return node.WithType(NullUtilities.ToNullableWithGenericsCheck(semanticModel, containingClass!, node.Type));
+      }
+
+      if (node.HasNonAutoGetter())
+      {
+        var getter = node.AccessorList!.Accessors.Single(a => a.Keyword.IsKind(SyntaxKind.GetKeyword));
+
+        var hasNullReturningExpressionBody = getter.ExpressionBody != null && NullUtilities.CanBeNull(getter.ExpressionBody.Expression, semanticModel);
+        var hasNullReturningStatementBody = getter.Body != null && NullUtilities.ReturnsNull(getter.Body.Statements, semanticModel);
+        var isNullReturning = hasNullReturningExpressionBody || hasNullReturningStatementBody;
+
+        if (isNullReturning)
+        {
+          var containingClass = node.FirstAncestorOrSelf<ClassDeclarationSyntax>();
+          return node.WithType(NullUtilities.ToNullableWithGenericsCheck(semanticModel, containingClass!, node.Type));
+        }
+      }
+
+      return base.VisitPropertyDeclaration(node);
+    }
+
+    protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites (INode method)
+    {
+      return method.Parents
+          .Select (p => p.From)
+          .OfType<IRewritable>()
+          .Select(r => (r, RewriteCapability.ReturnValueChange))
+          .ToArray();
+    }
+  }
+}

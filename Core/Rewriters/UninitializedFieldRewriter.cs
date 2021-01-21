@@ -51,7 +51,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
       SyntaxNode? ToNullable(FieldDeclarationSyntax node) => node.WithDeclaration(node.Declaration.WithType(NullUtilities.ToNullableWithGenericsCheck(CurrentField.SemanticModel, classSyntax, node.Declaration.Type)));
     }
 
-    protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(Method method)
+    protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(INode method)
     {
       return method.Parents
           .Select(p => p.From)

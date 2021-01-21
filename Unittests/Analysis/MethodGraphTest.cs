@@ -350,7 +350,7 @@ public class C
 
       public override SyntaxNode? VisitMethodDeclaration (MethodDeclarationSyntax node) => node.WithLeadingTrivia (SyntaxTriviaList.Create (new SyntaxTrivia()));
 
-      protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(Method method) =>
+      protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(INode method) =>
           method.Parents
               .Select(p => p.From)
               .OfType<IRewritable>()
