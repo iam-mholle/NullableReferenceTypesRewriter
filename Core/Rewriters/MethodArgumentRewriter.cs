@@ -46,9 +46,17 @@ namespace NullableReferenceTypesRewriter.Rewriters
       foreach (var parameterIndex in parametersToAnnotate)
       {
         var existingParameter = newList.Parameters[parameterIndex];
-        newList = newList.ReplaceNode(
-            existingParameter,
-            existingParameter.WithType (NullUtilities.ToNullable (existingParameter.Type!)));
+
+        if (existingParameter.AttributeLists.Any(l => l.Attributes.Any(a => a.ToString().EndsWith("NotNull"))))
+        {
+          Console.WriteLine($"ERROR: Trying to annotate NotNull parameter {existingParameter.ToString()} in {CurrentMethod}");
+        }
+        else
+        {
+          newList = newList.ReplaceNode(
+              existingParameter,
+              existingParameter.WithType(NullUtilities.ToNullable(existingParameter.Type!)));
+        }
       }
 
       return node.WithParameterList(newList);

@@ -45,7 +45,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     public void UpdateSyntaxTree(SyntaxTree old, SyntaxTree @new)
     {
-      Console.WriteLine ($"Updated syntaxtree of {old.FilePath}");
+      // Console.WriteLine ($"Updated syntaxtree of {old.FilePath}");
       _compilation = _compilation.ReplaceSyntaxTree(old, @new);
       UpdateCompilation();
     }
@@ -63,7 +63,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     public BaseMethodDeclarationSyntax GetMethodDeclarationSyntax (string filePath, string signature)
     {
-      Console.WriteLine($"Querying the MethodDeclarationSyntax of '{signature}' in '{filePath}'.");
+      // Console.WriteLine($"Querying the MethodDeclarationSyntax of '{signature}' in '{filePath}'.");
       return _compilation.SyntaxTrees
           .Where (t => t.FilePath == filePath)
           .SelectMany (
@@ -91,7 +91,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     public PropertyDeclarationSyntax GetPropertyDeclarationSyntax(string filePath, string signature)
     {
-      Console.WriteLine($"Querying the MethodDeclarationSyntax of '{signature}' in '{filePath}'.");
+      // Console.WriteLine($"Querying the MethodDeclarationSyntax of '{signature}' in '{filePath}'.");
       return _compilation.SyntaxTrees
           .Where (t => t.FilePath == filePath)
           .SelectMany (
