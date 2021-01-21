@@ -78,6 +78,8 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
           else if (rewriteCapability == RewriteCapability.ReturnValueChange)
           {
             node.Rewrite(new InheritanceReturnRewriter((b, c) => queue.Add((b, c))));
+            node.Rewrite(new LocalDeclarationRewriter((b, c) => queue.Add((b, c))));
+            node.Rewrite(new PropertyNullReturnRewriter((b, c) => queue.Add((b, c))));
           }
         }
       }
