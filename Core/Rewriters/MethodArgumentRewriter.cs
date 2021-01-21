@@ -47,7 +47,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
       {
         var existingParameter = newList.Parameters[parameterIndex];
 
-        if (existingParameter.AttributeLists.Any(l => l.Attributes.Any(a => a.ToString().EndsWith("NotNull"))))
+        if (existingParameter.HasNotNullAttribute())
         {
           Console.WriteLine($"ERROR: Trying to annotate NotNull parameter {existingParameter.ToString()} in {CurrentMethod}");
         }
