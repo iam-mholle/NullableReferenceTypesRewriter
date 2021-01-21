@@ -8,7 +8,6 @@ using NullableReferenceTypesRewriter.Utilities;
 
 namespace NullableReferenceTypesRewriter.Analysis
 {
-  // TODO: Array annotation is not working
   // TODO: InheritancePropertyRewriter (downward propagation)
   public class UninitializedPropertyRewriter : RewriterBase
   {
@@ -94,9 +93,12 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     private bool IsValueType (SemanticModel semanticModel, TypeSyntax declaration)
     {
+      if (declaration is ArrayTypeSyntax)
+        return false;
+
       var typeSymbol = semanticModel.GetTypeInfo (declaration).Type as INamedTypeSymbol;
 
-      return typeSymbol == null || typeSymbol.IsValueType;
+      return typeSymbol == null || (typeSymbol.IsValueType);
     }
 
     private bool IsNullable(SemanticModel semanticModel, PropertyDeclarationSyntax syntax)

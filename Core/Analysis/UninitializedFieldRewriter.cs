@@ -95,6 +95,9 @@ namespace NullableReferenceTypesRewriter.Analysis
 
     private bool IsValueType (SemanticModel semanticModel, TypeSyntax declaration)
     {
+      if (declaration is ArrayTypeSyntax)
+        return false;
+
       var typeSymbol = semanticModel.GetTypeInfo (declaration).Type as INamedTypeSymbol;
 
       return typeSymbol == null || typeSymbol.IsValueType;

@@ -245,6 +245,28 @@ public A(bool _)
       Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
     }
 
+    [Test]
+    public void Uninitialized_Array_Nullable ()
+    {
+      //language=C#
+      const string expected = @"
+public string[]? Test { get; set; }
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
+          "A",
+          //language=C#
+          @"
+public string[] Test { get; set; }
+");
+      var syntax = (PropertyDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.PropertyDeclaration));
+      var field = CreatePropertyWrapper (syntax, semantic);
+      var sut = new UninitializedPropertyRewriter((b, c) => { });
+
+      var result = sut.Rewrite (field);
+
+      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+    }
+
     private Property CreatePropertyWrapper (
         PropertyDeclarationSyntax syntax,
         SemanticModel semanticModel,
