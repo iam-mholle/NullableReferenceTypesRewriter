@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace NullableReferenceTypesRewriter.UnitTests.Analysis
 {
   [TestFixture]
-  public class InheritanceReturnRewriterTest
+  public class InheritanceReturnRewriterTest : RewriterTestBase
   {
     [Test]
     public void AbstractOverride_OverriddenReturnNullable_Nullable()
@@ -190,19 +190,6 @@ public class Something : ISomething
       var result = sut.Rewrite (method);
 
       Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
-    }
-
-    private Method CreateMethodWrapper (
-        MethodDeclarationSyntax syntax,
-        SemanticModel semanticModel,
-        Func<IReadOnlyCollection<Dependency>>? parents = null,
-        Func<IReadOnlyCollection<Dependency>>? children = null)
-    {
-      return new Method(
-          new SharedCompilation(semanticModel.Compilation),
-          semanticModel.GetDeclaredSymbol(syntax)!,
-          parents ?? Array.Empty<Dependency>,
-          children ?? Array.Empty<Dependency>);
     }
   }
 }

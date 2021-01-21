@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace NullableReferenceTypesRewriter.UnitTests.Analysis
 {
   [TestFixture]
-  public class NullReturnRewriterTest
+  public class NullReturnRewriterTest : RewriterTestBase
   {
     [Test]
     public void MethodReturningNull_ReturnValueNullable ()
@@ -546,19 +546,6 @@ public class A<T> where T : String
       var result = sut.Rewrite (method);
 
       Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
-    }
-
-    private Method CreateMethodWrapper (
-        MethodDeclarationSyntax syntax,
-        SemanticModel semanticModel,
-        Func<IReadOnlyCollection<Dependency>>? parents = null,
-        Func<IReadOnlyCollection<Dependency>>? children = null)
-    {
-      return new Method(
-          new SharedCompilation(semanticModel.Compilation),
-          semanticModel.GetDeclaredSymbol(syntax)!,
-          parents ?? Array.Empty<Dependency>,
-          children ?? Array.Empty<Dependency>);
     }
   }
 }

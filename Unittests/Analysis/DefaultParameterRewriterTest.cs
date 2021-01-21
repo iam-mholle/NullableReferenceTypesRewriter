@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace NullableReferenceTypesRewriter.UnitTests.Analysis
 {
   [TestFixture]
-  public class DefaultParameterRewriterTest
+  public class DefaultParameterRewriterTest : RewriterTestBase
   {
     [Test]
     public void DefaultParameter_InCtor_Nullable()

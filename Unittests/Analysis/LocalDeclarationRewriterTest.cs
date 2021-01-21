@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace NullableReferenceTypesRewriter.UnitTests.Analysis
 {
   [TestFixture]
-  public class LocalDeclarationRewriterTest
+  public class LocalDeclarationRewriterTest : RewriterTestBase
   {
     [Test]
     public void SingleDeclaration_UninitializedValueType_Unchanged()
@@ -234,19 +234,6 @@ public void DoStuff()
       var result = sut.Rewrite (method);
 
       Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
-    }
-
-    private Method CreateMethodWrapper (
-        MethodDeclarationSyntax syntax,
-        SemanticModel semanticModel,
-        Func<IReadOnlyCollection<Dependency>>? parents = null,
-        Func<IReadOnlyCollection<Dependency>>? children = null)
-    {
-      return new Method(
-          new SharedCompilation(semanticModel.Compilation),
-          semanticModel.GetDeclaredSymbol(syntax)!,
-          parents ?? Array.Empty<Dependency>,
-          children ?? Array.Empty<Dependency>);
     }
   }
 }

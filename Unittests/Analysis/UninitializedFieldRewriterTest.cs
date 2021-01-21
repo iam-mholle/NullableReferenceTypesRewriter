@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace NullableReferenceTypesRewriter.UnitTests.Analysis
 {
   [TestFixture]
-  public class UninitializedFieldRewriterTest
+  public class UninitializedFieldRewriterTest : RewriterTestBase
   {
     [Test]
     public void InlineInitialized_ToNull_Nullable ()
@@ -383,17 +383,6 @@ public A(bool _) { }
       var result = sut.Rewrite (field);
 
       Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
-    }
-
-    private Field CreateFieldWrapper (
-        FieldDeclarationSyntax syntax,
-        SemanticModel semanticModel,
-        Func<IReadOnlyCollection<Dependency>>? parents = null)
-    {
-      return new Field(
-          new SharedCompilation(semanticModel.Compilation),
-          (IFieldSymbol) semanticModel.GetDeclaredSymbol(syntax.Declaration.Variables.First())!,
-          parents ?? Array.Empty<Dependency>);
     }
   }
 }
