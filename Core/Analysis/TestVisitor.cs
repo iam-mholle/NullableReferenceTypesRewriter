@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
+using NullableReferenceTypesRewriter.Rewriters;
 
 namespace NullableReferenceTypesRewriter.Analysis
 {

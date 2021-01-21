@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NullableReferenceTypesRewriter.Analysis;
+using NullableReferenceTypesRewriter.Rewriters;
 using NUnit.Framework;
 
 namespace NullableReferenceTypesRewriter.UnitTests.Analysis

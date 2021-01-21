@@ -20,6 +20,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.MSBuild;
 using NullableReferenceTypesRewriter.Analysis;
+using NullableReferenceTypesRewriter.Rewriters;
 
 namespace NullableReferenceTypesRewriter.ConsoleApplication
 {
