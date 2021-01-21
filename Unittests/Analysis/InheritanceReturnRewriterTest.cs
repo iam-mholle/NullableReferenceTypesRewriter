@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace NullableReferenceTypesRewriter.UnitTests.Analysis
 {
   [TestFixture]
-  public class InheritanceReturnRewriterTest : RewriterTestBase
+  public class InheritanceReturnRewriterTest : RewriterTestBase<InheritanceReturnRewriter>
   {
     [Test]
     public void AbstractOverride_OverriddenReturnNullable_Nullable()

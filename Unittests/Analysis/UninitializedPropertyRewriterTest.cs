@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using NullableReferenceTypesRewriter.Analysis;
+﻿using NullableReferenceTypesRewriter.Analysis;
 using NUnit.Framework;
 
 namespace NullableReferenceTypesRewriter.UnitTests.Analysis
 {
   [TestFixture]
-  public class UninitializedPropertyRewriterTest
+  public class UninitializedPropertyRewriterTest : RewriterTestBase<UninitializedPropertyRewriter>
   {
     [Test]
     public void InlineInitialized_ToNull_Nullable ()
@@ -19,19 +13,12 @@ namespace NullableReferenceTypesRewriter.UnitTests.Analysis
       const string expected = @"
 public string? Test { get; set; } = null;
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public string Test { get; set; } = null;
-");
-      var syntax = (PropertyDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.PropertyDeclaration));
-      var field = CreatePropertyWrapper (syntax, semantic);
-      var sut = new UninitializedPropertyRewriter((b, c) => { });
+";
 
-      var result = sut.Rewrite (field);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+      SimpleRewriteAssertion(expected, input, WrapperType.Property);
     }
 
     [Test]
@@ -41,19 +28,12 @@ public string Test { get; set; } = null;
       const string expected = @"
 public string Test { get; set; } = ""some string"";
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public string Test { get; set; } = ""some string"";
-");
-      var syntax = (PropertyDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.PropertyDeclaration));
-      var field = CreatePropertyWrapper (syntax, semantic);
-      var sut = new UninitializedPropertyRewriter((b, c) => { });
-
-      var result = sut.Rewrite (field);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+";
+      
+      SimpleRewriteAssertion(expected, input, WrapperType.Property);
     }
 
     [Test]
@@ -63,19 +43,12 @@ public string Test { get; set; } = ""some string"";
       const string expected = @"
 public int Test { get; set; }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public int Test { get; set; }
-");
-      var syntax = (PropertyDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.PropertyDeclaration));
-      var field = CreatePropertyWrapper (syntax, semantic);
-      var sut = new UninitializedPropertyRewriter((b, c) => { });
-
-      var result = sut.Rewrite (field);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+";
+      
+      SimpleRewriteAssertion(expected, input, WrapperType.Property);
     }
 
     [Test]
@@ -85,19 +58,12 @@ public int Test { get; set; }
       const string expected = @"
 public string? Test { get; set; }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public string? Test { get; set; }
-");
-      var syntax = (PropertyDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.PropertyDeclaration));
-      var field = CreatePropertyWrapper (syntax, semantic);
-      var sut = new UninitializedPropertyRewriter((b, c) => { });
-
-      var result = sut.Rewrite (field);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+";
+      
+      SimpleRewriteAssertion(expected, input, WrapperType.Property);
     }
 
     [Test]
@@ -107,24 +73,17 @@ public string? Test { get; set; }
       const string expected = @"
 public string? Test { get; set; }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public string Test { get; set; }
 
 public A()
 {
   Test = null;
 }
-");
-      var syntax = (PropertyDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.PropertyDeclaration));
-      var field = CreatePropertyWrapper (syntax, semantic);
-      var sut = new UninitializedPropertyRewriter((b, c) => { });
-
-      var result = sut.Rewrite (field);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+";
+      
+      SimpleRewriteAssertion(expected, input, WrapperType.Property);
     }
 
     [Test]
@@ -134,24 +93,17 @@ public A()
       const string expected = @"
 public string Test { get; set; }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public string Test { get; set; }
 
 public A()
 {
   Test = ""some string"";
 }
-");
-      var syntax = (PropertyDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.PropertyDeclaration));
-      var field = CreatePropertyWrapper (syntax, semantic);
-      var sut = new UninitializedPropertyRewriter((b, c) => { });
-
-      var result = sut.Rewrite (field);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+";
+      
+      SimpleRewriteAssertion(expected, input, WrapperType.Property);
     }
 
     [Test]
@@ -161,10 +113,8 @@ public A()
       const string expected = @"
 public string? Test { get; set; }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public string Test { get; set; }
 
 public A()
@@ -175,14 +125,9 @@ public A(bool _)
 {
   Test = null;
 }
-");
-      var syntax = (PropertyDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.PropertyDeclaration));
-      var field = CreatePropertyWrapper (syntax, semantic);
-      var sut = new UninitializedPropertyRewriter((b, c) => { });
-
-      var result = sut.Rewrite (field);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+";
+      
+      SimpleRewriteAssertion(expected, input, WrapperType.Property);
     }
 
     [Test]
@@ -192,10 +137,8 @@ public A(bool _)
       const string expected = @"
 public string? Test { get; set; }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public string Test { get; set; }
 
 public A() : this(true)
@@ -205,14 +148,9 @@ public A(bool _)
 {
   Test = null;
 }
-");
-      var syntax = (PropertyDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.PropertyDeclaration));
-      var field = CreatePropertyWrapper (syntax, semantic);
-      var sut = new UninitializedPropertyRewriter((b, c) => { });
-
-      var result = sut.Rewrite (field);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+";
+      
+      SimpleRewriteAssertion(expected, input, WrapperType.Property);
     }
 
     [Test]
@@ -222,10 +160,8 @@ public A(bool _)
       const string expected = @"
 public string Test { get; set; }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public string Test { get; set; }
 
 public A() : this(true)
@@ -235,14 +171,9 @@ public A(bool _)
 {
   Test = ""some string"";
 }
-");
-      var syntax = (PropertyDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.PropertyDeclaration));
-      var field = CreatePropertyWrapper (syntax, semantic);
-      var sut = new UninitializedPropertyRewriter((b, c) => { });
-
-      var result = sut.Rewrite (field);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+";
+      
+      SimpleRewriteAssertion(expected, input, WrapperType.Property);
     }
 
     [Test]
@@ -252,19 +183,12 @@ public A(bool _)
       const string expected = @"
 public string[]? Test { get; set; }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public string[] Test { get; set; }
-");
-      var syntax = (PropertyDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.PropertyDeclaration));
-      var field = CreatePropertyWrapper (syntax, semantic);
-      var sut = new UninitializedPropertyRewriter((b, c) => { });
-
-      var result = sut.Rewrite (field);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+";
+      
+      SimpleRewriteAssertion(expected, input, WrapperType.Property);
     }
 
     [Test]
@@ -274,33 +198,13 @@ public string[] Test { get; set; }
       const string expected = @"
 public string Test { get { return _test; } }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public string Test { get { return _test; } }
 private string _test = ""some string"";
-");
-      var syntax = (PropertyDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.PropertyDeclaration));
-      var field = CreatePropertyWrapper (syntax, semantic);
-      var sut = new UninitializedPropertyRewriter((b, c) => { });
-
-      var result = sut.Rewrite (field);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
-    }
-
-    private Property CreatePropertyWrapper (
-        PropertyDeclarationSyntax syntax,
-        SemanticModel semanticModel,
-        Func<IReadOnlyCollection<Dependency>>? parents = null,
-        Func<IReadOnlyCollection<Dependency>>? children = null)
-    {
-      return new Property(
-          new SharedCompilation(semanticModel.Compilation),
-          (IPropertySymbol) semanticModel.GetDeclaredSymbol(syntax)!,
-          parents ?? Array.Empty<Dependency>,
-          children ?? Array.Empty<Dependency>);
+";
+      
+      SimpleRewriteAssertion(expected, input, WrapperType.Property);
     }
   }
 }

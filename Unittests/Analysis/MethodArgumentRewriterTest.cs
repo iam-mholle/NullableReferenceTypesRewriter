@@ -9,7 +9,7 @@ using NUnit.Framework;
 
 namespace NullableReferenceTypesRewriter.UnitTests.Analysis
 {
-  public class MethodArgumentRewriterTest : RewriterTestBase
+  public class MethodArgumentRewriterTest : RewriterTestBase<MethodArgumentRewriter>
   {
     [Test]
     public void SingleParameter_NullArgument_Nullable()

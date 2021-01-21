@@ -1,16 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NullableReferenceTypesRewriter.Analysis;
 using NUnit.Framework;
 
 namespace NullableReferenceTypesRewriter.UnitTests.Analysis
 {
   [TestFixture]
-  public class NullReturnRewriterTest : RewriterTestBase
+  public class NullReturnRewriterTest : RewriterTestBase<NullReturnRewriter>
   {
     [Test]
     public void MethodReturningNull_ReturnValueNullable ()
@@ -22,43 +16,28 @@ public object? DoStuff()
   return null;
 }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public object DoStuff()
 {
   return null;
 }
-");
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var method = CreateMethodWrapper (syntax, semantic);
-      var sut = new NullReturnRewriter((b, c) => { });
+";
 
-      var result = sut.Rewrite (method);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+      SimpleRewriteAssertion(expected, input, WrapperType.Method);
     }
 
     [Test]
     public void MethodReturningNull_ReturnValueAlreadyNullable_SameInstance ()
     {
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public object? DoStuff()
 {
   return null;
 }
-");
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var method = CreateMethodWrapper (syntax, semantic);
-      var sut = new NullReturnRewriter((b, c) => { });
-
-      var result = sut.Rewrite (method);
-
-      Assert.That (result, Is.SameAs(syntax));
+";
+      SimpleUnchangedAssertion(input, WrapperType.Method);
     }
 
     [Test]
@@ -71,10 +50,8 @@ public object? A()
   return B();
 }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public object A()
 {
   return B();
@@ -83,14 +60,9 @@ public object? B()
 {
   return null;
 }
-");
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var method = CreateMethodWrapper (syntax, semantic);
-      var sut = new NullReturnRewriter((b, c) => { });
+";
 
-      var result = sut.Rewrite (method);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+      SimpleRewriteAssertion(expected, input, WrapperType.Method);
     }
 
     [Test]
@@ -107,10 +79,8 @@ public object A()
   return b;
 }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public object A()
 {
   var b = B();
@@ -123,14 +93,9 @@ public object? B()
 {
   return null;
 }
-");
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var method = CreateMethodWrapper (syntax, semantic);
-      var sut = new NullReturnRewriter((b, c) => { });
+";
 
-      var result = sut.Rewrite (method);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+      SimpleRewriteAssertion(expected, input, WrapperType.Method);
     }
 
     [Test]
@@ -147,10 +112,8 @@ public object A()
   return b;
 }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public object A()
 {
   var b = B();
@@ -163,14 +126,9 @@ public object? B()
 {
   return null;
 }
-");
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var method = CreateMethodWrapper (syntax, semantic);
-      var sut = new NullReturnRewriter((b, c) => { });
+";
 
-      var result = sut.Rewrite (method);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+      SimpleRewriteAssertion(expected, input, WrapperType.Method);
     }
 
     [Test]
@@ -187,10 +145,8 @@ public object A()
   return new object();
 }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public object A()
 {
   var b = B();
@@ -203,14 +159,9 @@ public object? B()
 {
   return null;
 }
-");
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var method = CreateMethodWrapper (syntax, semantic);
-      var sut = new NullReturnRewriter((b, c) => { });
+";
 
-      var result = sut.Rewrite (method);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+      SimpleRewriteAssertion(expected, input, WrapperType.Method);
     }
 
     [Test]
@@ -223,22 +174,15 @@ public object? DoStuff<T>(T obj)
   return obj;
 }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public object DoStuff<T>(T obj)
 {
   return obj;
 }
-");
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var method = CreateMethodWrapper (syntax, semantic);
-      var sut = new NullReturnRewriter((b, c) => { });
-
-      var result = sut.Rewrite (method);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+";
+      
+      SimpleRewriteAssertion(expected, input, WrapperType.Method);
     }
 
     [Test]
@@ -254,10 +198,8 @@ public object DoStuff<T>(T obj)
   return obj;
 }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public object DoStuff<T>(T obj)
 {
   if (obj is null)
@@ -265,14 +207,9 @@ public object DoStuff<T>(T obj)
 
   return obj;
 }
-");
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var method = CreateMethodWrapper (syntax, semantic);
-      var sut = new NullReturnRewriter((b, c) => { });
-
-      var result = sut.Rewrite (method);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+";
+      
+      SimpleRewriteAssertion(expected, input, WrapperType.Method);
     }
 
     [Test]
@@ -288,10 +225,8 @@ public object DoStuff<T>(T obj)
   return obj;
 }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public object DoStuff<T>(T obj)
 {
   if (obj == null)
@@ -299,14 +234,9 @@ public object DoStuff<T>(T obj)
 
   return obj;
 }
-");
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var method = CreateMethodWrapper (syntax, semantic);
-      var sut = new NullReturnRewriter((b, c) => { });
-
-      var result = sut.Rewrite (method);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+";
+      
+      SimpleRewriteAssertion(expected, input, WrapperType.Method);
     }
 
     [Test]
@@ -322,10 +252,8 @@ public object DoStuff<T>(T obj)
   return new object();
 }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public object DoStuff<T>(T obj)
 {
   if (obj != null)
@@ -333,14 +261,9 @@ public object DoStuff<T>(T obj)
 
   return new object();
 }
-");
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var method = CreateMethodWrapper (syntax, semantic);
-      var sut = new NullReturnRewriter((b, c) => { });
-
-      var result = sut.Rewrite (method);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+";
+      
+      SimpleRewriteAssertion(expected, input, WrapperType.Method);
     }
 
     [Test]
@@ -353,22 +276,15 @@ public T DoStuff<T>(T obj)
   return null;
 }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public T DoStuff<T>(T obj)
 {
   return null;
 }
-");
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var method = CreateMethodWrapper (syntax, semantic);
-      var sut = new NullReturnRewriter((b, c) => { });
-
-      var result = sut.Rewrite (method);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+";
+      
+      SimpleRewriteAssertion(expected, input, WrapperType.Method);
     }
 
     [Test]
@@ -381,22 +297,15 @@ public T? DoStuff<T>(T obj) where T : class
   return null;
 }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public T DoStuff<T>(T obj) where T : class
 {
   return null;
 }
-");
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var method = CreateMethodWrapper (syntax, semantic);
-      var sut = new NullReturnRewriter((b, c) => { });
-
-      var result = sut.Rewrite (method);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+";
+      
+      SimpleRewriteAssertion(expected, input, WrapperType.Method);
     }
 
     [Test]
@@ -409,22 +318,15 @@ public T? DoStuff<T>(T obj) where T : String
   return null;
 }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public T DoStuff<T>(T obj) where T : String
 {
   return null;
 }
-");
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var method = CreateMethodWrapper (syntax, semantic);
-      var sut = new NullReturnRewriter((b, c) => { });
-
-      var result = sut.Rewrite (method);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+";
+      
+      SimpleRewriteAssertion(expected, input, WrapperType.Method);
     }
 
     [Test]
@@ -437,22 +339,15 @@ public T DoStuff<T>(T obj)
   return null;
 }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public T DoStuff<T>(T obj)
 {
   return null;
 }
-");
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var method = CreateMethodWrapper (syntax, semantic);
-      var sut = new NullReturnRewriter((b, c) => { });
-
-      var result = sut.Rewrite (method);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+";
+      
+      SimpleRewriteAssertion(expected, input, WrapperType.Method);
     }
 
     [Test]
@@ -465,10 +360,7 @@ public T DoStuff<T>(T obj)
     return null;
   }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInNameSpace(
-          "A",
-          //language=C#
-          @"
+      const string input = @"
 public class A<T>
 {
   public T DoStuff(T obj)
@@ -476,14 +368,9 @@ public class A<T>
     return null;
   }
 }
-");
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var method = CreateMethodWrapper (syntax, semantic);
-      var sut = new NullReturnRewriter((b, c) => { });
-
-      var result = sut.Rewrite (method);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+";
+      
+      SimpleRewriteAssertion(expected, input, WrapperType.Method, CompileIn.Namespace);
     }
 
     [Test]
@@ -496,10 +383,8 @@ public class A<T>
     return null;
   }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInNameSpace(
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public class A<T> where T : class
 {
   public T DoStuff(T obj)
@@ -507,14 +392,9 @@ public class A<T> where T : class
     return null;
   }
 }
-");
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var method = CreateMethodWrapper (syntax, semantic);
-      var sut = new NullReturnRewriter((b, c) => { });
-
-      var result = sut.Rewrite (method);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+";
+      
+      SimpleRewriteAssertion(expected, input, WrapperType.Method, CompileIn.Namespace);
     }
 
     [Test]
@@ -527,10 +407,8 @@ public class A<T> where T : class
     return null;
   }
 ";
-      var (semantic, root) = CompiledSourceFileProvider.CompileInNameSpace(
-          "A",
-          //language=C#
-          @"
+      //language=C#
+      const string input = @"
 public class A<T> where T : String
 {
   public T DoStuff(T obj)
@@ -538,14 +416,9 @@ public class A<T> where T : String
     return null;
   }
 }
-");
-      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().Single(n => n.IsKind (SyntaxKind.MethodDeclaration));
-      var method = CreateMethodWrapper (syntax, semantic);
-      var sut = new NullReturnRewriter((b, c) => { });
-
-      var result = sut.Rewrite (method);
-
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+";
+      
+      SimpleRewriteAssertion(expected, input, WrapperType.Method, CompileIn.Namespace);
     }
   }
 }
