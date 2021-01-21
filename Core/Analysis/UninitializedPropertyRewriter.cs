@@ -43,7 +43,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 
       var isInitializedToNotNull = constructors.All(c => PropertyInitializedToNotNullInCtorChain(semanticModel, c, node));
 
-      if (constructors.Length == 0 || !isInitializedToNotNull)
+      if (IsAutoProperty(node) && (constructors.Length == 0 || !isInitializedToNotNull))
         return node.WithType(NullUtilities.ToNullable(node.Type));
 
       return base.VisitPropertyDeclaration(node);
@@ -123,6 +123,11 @@ namespace NullableReferenceTypesRewriter.Analysis
       }
 
       return false;
+    }
+
+    private bool IsAutoProperty(PropertyDeclarationSyntax propertyDeclarationSyntax)
+    {
+      return propertyDeclarationSyntax.AccessorList?.Accessors.All(a => a.Body is null) ?? false;
     }
   }
 }
