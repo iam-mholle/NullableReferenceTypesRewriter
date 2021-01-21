@@ -37,7 +37,10 @@ namespace NullableReferenceTypesRewriter.Rewriters
         if (isNullReturning)
         {
           var containingClass = node.FirstAncestorOrSelf<ClassDeclarationSyntax>();
-          return node.WithType(NullUtilities.ToNullableWithGenericsCheck(semanticModel, containingClass!, node.Type));
+          if (containingClass != null)
+          {
+            return node.WithType(NullUtilities.ToNullableWithGenericsCheck(semanticModel, containingClass, node.Type));
+          }
         }
       }
 
