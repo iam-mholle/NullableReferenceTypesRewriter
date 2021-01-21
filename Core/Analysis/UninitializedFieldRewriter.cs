@@ -4,7 +4,6 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using NullableReferenceTypesRewriter.ClassFields;
 using NullableReferenceTypesRewriter.Utilities;
 
 namespace NullableReferenceTypesRewriter.Analysis
@@ -91,11 +90,14 @@ namespace NullableReferenceTypesRewriter.Analysis
       return fieldAssignments.All(a => !NullUtilities.CanBeNull(a.Right, semanticModel));
     }
 
-    private bool IsValueType (SemanticModel semanticModel, FieldDeclarationSyntax declaration)
+    private bool IsValueType(SemanticModel semanticModel, FieldDeclarationSyntax declaration)
+      => IsValueType(semanticModel, declaration.Declaration.Type);
+
+    private bool IsValueType (SemanticModel semanticModel, TypeSyntax declaration)
     {
-      var typeSymbol = semanticModel.GetTypeInfo (declaration.Declaration.Type).Type as INamedTypeSymbol;
-      return typeSymbol == null
-             || typeSymbol.IsValueType;
+      var typeSymbol = semanticModel.GetTypeInfo (declaration).Type as INamedTypeSymbol;
+
+      return typeSymbol == null || typeSymbol.IsValueType;
     }
 
     private bool IsNullable(SemanticModel semanticModel, FieldDeclarationSyntax syntax)
