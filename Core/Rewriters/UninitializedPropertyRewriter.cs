@@ -10,6 +10,16 @@ using NullableReferenceTypesRewriter.Utilities;
 namespace NullableReferenceTypesRewriter.Rewriters
 {
   // TODO: InheritancePropertyRewriter (downward propagation)
+  /// <summary>
+  /// Specs:<br/>
+  /// - Value-type properties are ignored<br/>
+  /// - Abstract properties are ignored<br/>
+  /// - Nullable reference type properties are ignored<br/>
+  /// - Properties declared in an interface are ignored<br/>
+  /// - Properties initialized to non-null values are ignored<br/>
+  /// - Properties initialized to nullable values are rewritten to return a nullable reference type<br/>
+  /// - Uninitialized auto-properties are rewritten to return a nullable reference type
+  /// </summary>
   public class UninitializedPropertyRewriter : RewriterBase
   {
     public UninitializedPropertyRewriter(Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
