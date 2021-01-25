@@ -9,6 +9,11 @@ using NullableReferenceTypesRewriter.Utilities;
 
 namespace NullableReferenceTypesRewriter.Rewriters
 {
+  /// <summary>
+  /// Specs:<br/>
+  /// - Expression-bodied properties returning a nullable value are rewritten to a nullable reference type<br/>
+  /// - Non-expression-bodied, non-auto-properties returning a nullable value are rewritten to a nullable reference type
+  /// </summary>
   public class PropertyNullReturnRewriter : RewriterBase
   {
     public PropertyNullReturnRewriter(Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
