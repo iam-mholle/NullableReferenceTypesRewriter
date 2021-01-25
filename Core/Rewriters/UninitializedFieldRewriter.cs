@@ -9,6 +9,13 @@ using NullableReferenceTypesRewriter.Utilities;
 
 namespace NullableReferenceTypesRewriter.Rewriters
 {
+  /// <summary>
+  /// Specs:<br/>
+  /// - Value-type fields are ignored<br/>
+  /// - Nullable reference type fields are ignored<br/>
+  /// - Fields containing at least one initialization to a nullable value are rewritten to be of a nullable reference type<br/>
+  /// - Uninitialized fields are rewritten to return a nullable reference type
+  /// </summary>
   public class UninitializedFieldRewriter : RewriterBase
   {
     public UninitializedFieldRewriter (Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
