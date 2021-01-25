@@ -9,6 +9,10 @@ using NullableReferenceTypesRewriter.Utilities;
 namespace NullableReferenceTypesRewriter.Rewriters
 {
   // TODO: Does not propagate to interfaces.
+  /// <summary>
+  /// Specs:<br/>
+  /// - Methods with a body returning a nullable value are rewritten to nullable reference type<br/>
+  /// </summary>
   public class NullReturnRewriter : RewriterBase
   {
     public NullReturnRewriter (Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
