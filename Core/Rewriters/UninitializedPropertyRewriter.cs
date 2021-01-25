@@ -10,7 +10,6 @@ using NullableReferenceTypesRewriter.Utilities;
 namespace NullableReferenceTypesRewriter.Rewriters
 {
   // TODO: InheritancePropertyRewriter (downward propagation)
-  // TODO: ignore abstract.
   public class UninitializedPropertyRewriter : RewriterBase
   {
     public UninitializedPropertyRewriter(Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
@@ -23,6 +22,9 @@ namespace NullableReferenceTypesRewriter.Rewriters
       var semanticModel = CurrentProperty.SemanticModel;
 
       if (IsValueType(semanticModel, node))
+        return node;
+
+      if (IsAbstract(node))
         return node;
 
       if (IsNullable(semanticModel, node))
@@ -106,6 +108,8 @@ namespace NullableReferenceTypesRewriter.Rewriters
     private bool IsNullable(SemanticModel semanticModel, PropertyDeclarationSyntax syntax)
       => semanticModel.GetDeclaredSymbol(syntax)?.Type.NullableAnnotation == NullableAnnotation.Annotated;
 
+    private bool IsAbstract(PropertyDeclarationSyntax syntax)
+      => syntax.Modifiers.Any(SyntaxKind.AbstractKeyword);
 
     private bool IsInitializedToNull (SemanticModel semanticModel, PropertyDeclarationSyntax propertyDeclaration)
     {

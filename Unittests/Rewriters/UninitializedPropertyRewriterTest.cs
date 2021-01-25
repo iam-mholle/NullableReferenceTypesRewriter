@@ -206,5 +206,16 @@ private string _test = ""some string"";
       
       SimpleRewriteAssertion(expected, input, WrapperType.Property);
     }
+
+    [Test]
+    public void Abstract_Unchanged ()
+    {
+      //language=C#
+      const string input = @"
+public abstract string Test { get }
+";
+
+      SimpleUnchangedAssertion(input, WrapperType.Property);
+    }
   }
 }
