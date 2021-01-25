@@ -35,9 +35,17 @@ namespace NullableReferenceTypesRewriter.Rewriters
       foreach (var parameterIndex in res)
       {
         var existingParameter = newList.Parameters[parameterIndex];
-        newList = newList.ReplaceNode(
-            existingParameter,
-            existingParameter.WithType (NullUtilities.ToNullableWithGenericsCheck (CurrentMethod.SemanticModel, node, existingParameter.Type!)));
+
+        if (existingParameter.HasNotNullAttribute())
+        {
+          Console.WriteLine($"ERROR: Trying to annotate NotNull parameter {existingParameter.ToString()} in {CurrentMethod}");
+        }
+        else
+        {
+          newList = newList.ReplaceNode(
+              existingParameter,
+              existingParameter.WithType (NullUtilities.ToNullableWithGenericsCheck (CurrentMethod.SemanticModel, node, existingParameter.Type!)));
+        }
       }
 
       return node.WithParameterList(newList);
