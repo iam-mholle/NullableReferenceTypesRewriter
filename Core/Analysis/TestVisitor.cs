@@ -17,6 +17,7 @@ namespace NullableReferenceTypesRewriter.Analysis
     private readonly RewriterBase _defaultParameterRewriter;
     private readonly RewriterBase _uninitializedPropertyRewriter;
     private readonly RewriterBase _propertyNullReturnRewriter;
+    private readonly RewriterBase _inheritancePropertyRewriter;
 
     public TestVisitor (Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
     {
@@ -30,6 +31,7 @@ namespace NullableReferenceTypesRewriter.Analysis
       _defaultParameterRewriter = new DefaultParameterRewriter (additionalRewrites);
       _uninitializedPropertyRewriter = new UninitializedPropertyRewriter(additionalRewrites);
       _propertyNullReturnRewriter = new PropertyNullReturnRewriter(additionalRewrites);
+      _inheritancePropertyRewriter = new InheritancePropertyRewriter(additionalRewrites);
     }
 
     public override void VisitMethod (Method method)
@@ -62,6 +64,7 @@ namespace NullableReferenceTypesRewriter.Analysis
     {
       property.Rewrite(_uninitializedPropertyRewriter);
       property.Rewrite(_propertyNullReturnRewriter);
+      property.Rewrite(_inheritancePropertyRewriter);
       base.VisitProperty(property);
     }
   }
