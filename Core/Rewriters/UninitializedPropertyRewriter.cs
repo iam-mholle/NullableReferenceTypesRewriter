@@ -9,7 +9,6 @@ using NullableReferenceTypesRewriter.Utilities;
 
 namespace NullableReferenceTypesRewriter.Rewriters
 {
-  // TODO: InheritancePropertyRewriter (downward propagation)
   /// <summary>
   /// Specs:<br/>
   /// - Value-type properties are ignored<br/>
