@@ -165,6 +165,13 @@ namespace NullableReferenceTypesRewriter.Analysis
               UniqueSymbolNameGenerator.Generate(propertySymbol),
               DependencyType.Usage);
         }
+        else if (symbolInfoCandidate.Symbol is IEventSymbol eventSymbol)
+        {
+          _graph.AddDependency(
+              UniqueSymbolNameGenerator.Generate(containingMethodSymbol),
+              UniqueSymbolNameGenerator.Generate(eventSymbol),
+              DependencyType.Usage);
+        }
       }
 
       base.VisitIdentifierName (node);
@@ -183,6 +190,31 @@ namespace NullableReferenceTypesRewriter.Analysis
       }
 
       base.VisitFieldDeclaration (node);
+    }
+
+    public override void VisitEventDeclaration(EventDeclarationSyntax node)
+    {
+      var symbol = GetSemanticModel(node).GetDeclaredSymbol(node);
+
+      if (symbol == null) throw new InvalidOperationException();
+
+      _graph.AddEvent(UniqueSymbolNameGenerator.Generate(symbol), symbol);
+
+      base.VisitEventDeclaration(node);
+    }
+
+    public override void VisitEventFieldDeclaration(EventFieldDeclarationSyntax node)
+    {
+      foreach (var eventFieldVariable in node.Declaration.Variables)
+      {
+        var symbol = (IEventSymbol?) GetSemanticModel(node).GetDeclaredSymbol(eventFieldVariable);
+
+        if (symbol == null) throw new InvalidOperationException();
+
+        _graph.AddEvent(UniqueSymbolNameGenerator.Generate(symbol), symbol);
+      }
+
+      base.VisitEventFieldDeclaration(node);
     }
 
     public override void VisitPropertyDeclaration(PropertyDeclarationSyntax node)

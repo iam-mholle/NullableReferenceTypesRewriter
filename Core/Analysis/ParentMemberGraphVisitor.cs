@@ -31,6 +31,11 @@ namespace NullableReferenceTypesRewriter.Analysis
       VisitParents (field);
     }
 
+    public override void VisitEvent (Event @event)
+    {
+      VisitParents (@event);
+    }
+
     public override void VisitProperty(Property property)
     {
       VisitParents(property);

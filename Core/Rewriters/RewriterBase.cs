@@ -18,6 +18,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
     protected Method CurrentMethod = null!;
     protected Field CurrentField = null!;
     protected Property CurrentProperty = null!;
+    protected Event CurrentEvent = null!;
 
     protected RewriterBase (Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
     {
@@ -54,7 +55,6 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
       try
       {
-        Console.WriteLine(property.ToString());
         var rewritten = VisitPropertyDeclaration ((PropertyDeclarationSyntax) property.RewritableSyntaxNode);
 
         if (rewritten == null)
@@ -99,6 +99,30 @@ namespace NullableReferenceTypesRewriter.Rewriters
       finally
       {
         CurrentMethod = null!;
+      }
+    }
+
+    public SyntaxNode Rewrite(Event @event)
+    {
+      CurrentEvent = @event;
+
+      try
+      {
+        var rewritten = VisitEventDeclaration ((EventDeclarationSyntax) @event.RewritableSyntaxNode);
+
+        if (rewritten == null)
+          throw new InvalidOperationException ("Could not rewrite event.");
+
+        if (rewritten == @event.RewritableSyntaxNode)
+          return @event.RewritableSyntaxNode;
+
+        _additionalRewrites (this, GetAdditionalRewrites (@event));
+
+        return rewritten;
+      }
+      finally
+      {
+        CurrentEvent = null!;
       }
     }
 

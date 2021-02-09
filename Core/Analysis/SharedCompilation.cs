@@ -103,6 +103,32 @@ namespace NullableReferenceTypesRewriter.Analysis
           .Single();
     }
 
+    public EventDeclarationSyntax? GetEventDeclarationSyntax(string filePath, string signature)
+    {
+      return _compilation.SyntaxTrees
+          .Where (t => t.FilePath == filePath)
+          .SelectMany (
+              t =>
+                  t.GetRoot()
+                      .DescendantNodes (_ => true)
+                      .OfType<EventDeclarationSyntax>()
+                      .Where (n => NullabilityTrimmingEquals(_compilation.GetSemanticModel (t).GetDeclaredSymbol (n)!.ToDisplayStringWithStaticModifier(),signature)))
+          .SingleOrDefault();
+    }
+
+    public EventFieldDeclarationSyntax? GetEventFieldDeclarationSyntax(string filePath, string signature)
+    {
+      return _compilation.SyntaxTrees
+          .Where (t => t.FilePath == filePath)
+          .SelectMany (
+              t =>
+                  t.GetRoot()
+                      .DescendantNodes (_ => true)
+                      .OfType<EventFieldDeclarationSyntax>()
+                      .Where (n => NullabilityTrimmingEquals(_compilation.GetSemanticModel (t).GetDeclaredSymbol (n)!.ToDisplayStringWithStaticModifier(),signature)))
+          .SingleOrDefault();
+    }
+
     private static bool NullabilityTrimmingEquals (string a, string b)
     {
       return a.Replace ("?", "") == b.Replace ("?", "");

@@ -19,5 +19,10 @@ namespace NullableReferenceTypesRewriter.Analysis
     {
       return propertySymbol.ToString();
     }
+
+    public static string Generate (IEventSymbol eventSymbol)
+    {
+      return eventSymbol.ToString();
+    }
   }
 }

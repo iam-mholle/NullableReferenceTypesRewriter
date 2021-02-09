@@ -50,6 +50,13 @@ namespace NullableReferenceTypesRewriter.Analysis
       _members[uniqueName] = property;
     }
 
+    public void AddEvent(string uniqueName, IEventSymbol symbol)
+    {
+      var @event = new Event(_compilation, symbol, CreateParentGetter(uniqueName));
+
+      _members[uniqueName] = @event;
+    }
+
     public void AddDependency (string fromMethodSymbol, string toMethodSymbol, DependencyType dependencyType)
     {
       var dependency = new Dependency (

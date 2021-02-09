@@ -36,5 +36,9 @@ namespace NullableReferenceTypesRewriter.Analysis
     public override void VisitField (Field field)
     {
     }
+
+    public override void VisitEvent(Event @event)
+    {
+    }
   }
 }

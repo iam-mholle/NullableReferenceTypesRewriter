@@ -6,5 +6,6 @@ namespace NullableReferenceTypesRewriter.Analysis
     public abstract void VisitExternalMethod (ExternalMethod externalMethod);
     public abstract void VisitField (Field field);
     public abstract void VisitProperty(Property property);
+    public abstract void VisitEvent(Event @event);
   }
 }
