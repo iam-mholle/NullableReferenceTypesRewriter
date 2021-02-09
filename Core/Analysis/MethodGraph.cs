@@ -95,6 +95,19 @@ namespace NullableReferenceTypesRewriter.Analysis
       return _members.Values.Where (n => n.Parents.Count == 0).ToArray();
     }
 
+    public void ForEachNode(Action<IRewritable> action, Func<INode, bool>? predicate = null)
+    {
+      predicate ??= _ => true;
+
+      foreach (var member in _members.Select(m => m.Value).OfType<IRewritable>())
+      {
+        if (predicate((INode) member))
+        {
+          action(member);
+        }
+      }
+    }
+
     private Func<IReadOnlyCollection<Dependency>> CreateParentGetter (string key)
     {
       return () =>

@@ -91,7 +91,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
       return method.Parents
           .Select(p => p.From)
           .OfType<IRewritable>()
-          .Select(r => (r, RewriteCapability.ReturnValueChange))
+          .Select(r => (r, RewriteCapability.ParameterChange))
           .ToArray();
     }
   }

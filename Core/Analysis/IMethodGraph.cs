@@ -8,5 +8,6 @@ namespace NullableReferenceTypesRewriter.Analysis
     INode GetNode (string uniqueMethodName);
     IReadOnlyCollection<INode> GetNodesWithoutChildren ();
     IReadOnlyCollection<INode> GetNodesWithoutParents ();
+    void ForEachNode(Action<IRewritable> action, Func<INode, bool>? predicate = null);
   }
 }

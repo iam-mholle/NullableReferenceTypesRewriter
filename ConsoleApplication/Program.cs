@@ -54,12 +54,35 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
 
       var graph = graphBuilder.Graph;
       var queue = new List<(RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>)>();
-      var visitor = new TestVisitor((rewriter, collection) => queue.Add((rewriter, collection)));
 
-      foreach (var node in graph.GetNodesWithoutChildren())
+      Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites = (b, c) => queue.Add((b, c));
+
+      var nullReturnRewriter = new NullReturnRewriter(additionalRewrites);
+      var castExpressionRewriter = new CastExpressionRewriter (additionalRewrites);
+      var localDeclarationRewriter = new LocalDeclarationRewriter (additionalRewrites);
+      var methodArgumentRewriter = new MethodArgumentRewriter (additionalRewrites);
+      var uninitializedFieldRewriter = new UninitializedFieldRewriter (additionalRewrites);
+      var inheritanceParameterRewriter = new InheritanceParameterRewriter (additionalRewrites);
+      var inheritanceReturnRewriter = new InheritanceReturnRewriter (additionalRewrites);
+      var defaultParameterRewriter = new DefaultParameterRewriter (additionalRewrites);
+      var uninitializedPropertyRewriter = new UninitializedPropertyRewriter(additionalRewrites);
+      var propertyNullReturnRewriter = new PropertyNullReturnRewriter(additionalRewrites);
+      var inheritancePropertyRewriter = new InheritancePropertyRewriter(additionalRewrites);
+
+      graph.ForEachNode(n =>
       {
-        node.Accept (visitor);
-      }
+        n.Rewrite(nullReturnRewriter);
+        n.Rewrite(castExpressionRewriter);
+        n.Rewrite(localDeclarationRewriter);
+        n.Rewrite(methodArgumentRewriter);
+        n.Rewrite(uninitializedFieldRewriter);
+        n.Rewrite(inheritanceParameterRewriter);
+        n.Rewrite(inheritanceReturnRewriter);
+        n.Rewrite(defaultParameterRewriter);
+        n.Rewrite(uninitializedPropertyRewriter);
+        n.Rewrite(propertyNullReturnRewriter);
+        n.Rewrite(inheritancePropertyRewriter);
+      }, n => n.GetType() != typeof(ExternalMethod));
 
       for (var i = 0; i < queue.Count; i++)
       {
@@ -69,18 +92,18 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
         {
           if (rewriteCapability == RewriteCapability.ParameterChange)
           {
-            node.Rewrite(new DefaultParameterRewriter((b, c) => queue.Add((b, c))));
-            node.Rewrite(new CastExpressionRewriter((b, c) => queue.Add((b, c))));
-            node.Rewrite(new LocalDeclarationRewriter((b, c) => queue.Add((b, c))));
-            node.Rewrite(new MethodArgumentRewriter((b, c) => queue.Add((b, c))));
-            node.Rewrite(new InheritanceParameterRewriter((b, c) => queue.Add((b, c))));
+            node.Rewrite(defaultParameterRewriter);
+            node.Rewrite(castExpressionRewriter);
+            node.Rewrite(localDeclarationRewriter);
+            node.Rewrite(methodArgumentRewriter);
+            node.Rewrite(inheritanceParameterRewriter);
           }
           else if (rewriteCapability == RewriteCapability.ReturnValueChange)
           {
-            node.Rewrite(new InheritanceReturnRewriter((b, c) => queue.Add((b, c))));
-            node.Rewrite(new LocalDeclarationRewriter((b, c) => queue.Add((b, c))));
-            node.Rewrite(new PropertyNullReturnRewriter((b, c) => queue.Add((b, c))));
-            node.Rewrite(new InheritancePropertyRewriter((b, c) => queue.Add((b, c))));
+            node.Rewrite(inheritanceReturnRewriter);
+            node.Rewrite(localDeclarationRewriter);
+            node.Rewrite(propertyNullReturnRewriter);
+            node.Rewrite(inheritancePropertyRewriter);
           }
         }
       }

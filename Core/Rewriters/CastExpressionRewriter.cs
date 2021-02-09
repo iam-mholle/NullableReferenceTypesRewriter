@@ -22,7 +22,9 @@ namespace NullableReferenceTypesRewriter.Rewriters
       if (type is NullableTypeSyntax)
         return node;
 
-      var semanticModel = CurrentMethod.SemanticModel;
+      var semanticModel = CurrentMethod?.SemanticModel
+          ?? CurrentProperty?.SemanticModel
+          ?? CurrentField.SemanticModel;
 
       return NullUtilities.CanBeNull (node.Expression, semanticModel)
           ? node.WithType (ToNullableWithFittingContext (type))

@@ -28,56 +28,78 @@ namespace NullableReferenceTypesRewriter.Rewriters
     {
       CurrentField = field;
 
-      var rewritten = VisitFieldDeclaration ((FieldDeclarationSyntax) field.RewritableSyntaxNode);
+      try
+      {
+        var rewritten = VisitFieldDeclaration ((FieldDeclarationSyntax) field.RewritableSyntaxNode);
 
-      if (rewritten == null)
-        throw new InvalidOperationException ("Could not rewrite field.");
+        if (rewritten == null)
+          throw new InvalidOperationException ("Could not rewrite field.");
 
-      if (rewritten == field.RewritableSyntaxNode)
-        return field.RewritableSyntaxNode;
+        if (rewritten == field.RewritableSyntaxNode)
+          return field.RewritableSyntaxNode;
 
-      _additionalRewrites (this, GetAdditionalRewrites (field));
+        _additionalRewrites (this, GetAdditionalRewrites (field));
 
-      return rewritten;
+        return rewritten;
+      }
+      finally
+      {
+        CurrentField = null!;
+      }
     }
 
     public SyntaxNode Rewrite (Property property)
     {
       CurrentProperty = property;
 
-      var rewritten = VisitPropertyDeclaration ((PropertyDeclarationSyntax) property.RewritableSyntaxNode);
+      try
+      {
+        Console.WriteLine(property.ToString());
+        var rewritten = VisitPropertyDeclaration ((PropertyDeclarationSyntax) property.RewritableSyntaxNode);
 
-      if (rewritten == null)
-        throw new InvalidOperationException ("Could not rewrite property.");
+        if (rewritten == null)
+          throw new InvalidOperationException ("Could not rewrite property.");
 
-      if (rewritten == property.RewritableSyntaxNode)
-        return property.RewritableSyntaxNode;
+        if (rewritten == property.RewritableSyntaxNode)
+          return property.RewritableSyntaxNode;
 
-      _additionalRewrites (this, GetAdditionalRewrites (property));
+        _additionalRewrites (this, GetAdditionalRewrites (property));
 
-      return rewritten;
+        return rewritten;
+      }
+      finally
+      {
+        CurrentProperty = null!;
+      }
     }
 
     public SyntaxNode Rewrite (Method method)
     {
       CurrentMethod = method;
 
-      var rewritten = method.RewritableSyntaxNode switch
+      try
       {
-          MethodDeclarationSyntax m => VisitMethodDeclaration(m),
-          ConstructorDeclarationSyntax c => VisitConstructorDeclaration(c),
-          _ => throw new InvalidOperationException($"{method.RewritableSyntaxNode.GetType()} is not supported."),
-      };
+        var rewritten = method.RewritableSyntaxNode switch
+        {
+            MethodDeclarationSyntax m => VisitMethodDeclaration(m),
+            ConstructorDeclarationSyntax c => VisitConstructorDeclaration(c),
+            _ => throw new InvalidOperationException($"{method.RewritableSyntaxNode.GetType()} is not supported."),
+        };
 
-      if (rewritten == null)
-        throw new InvalidOperationException ("Could not rewrite method.");
+        if (rewritten == null)
+          throw new InvalidOperationException ("Could not rewrite method.");
 
-      if (rewritten == method.RewritableSyntaxNode)
-        return method.RewritableSyntaxNode;
+        if (rewritten == method.RewritableSyntaxNode)
+          return method.RewritableSyntaxNode;
 
-      _additionalRewrites (this, GetAdditionalRewrites (method));
+        _additionalRewrites (this, GetAdditionalRewrites (method));
 
-      return rewritten;
+        return rewritten;
+      }
+      finally
+      {
+        CurrentMethod = null!;
+      }
     }
 
     protected virtual IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites (INode node)
