@@ -10,6 +10,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
   // TODO: Separate CanBeNullAttributeRewriter
   // TODO: Integrate events.
   // TODO: Document rewriter capabilities thoroughly.
+  // TODO: out Parameter rewriter
   // TODO: Don't Annotate [NotNull] parameters or return types, output error instead.
   public abstract class RewriterBase : CSharpSyntaxRewriter
   {
