@@ -124,9 +124,10 @@ namespace NullableReferenceTypesRewriter.Analysis
               t =>
                   t.GetRoot()
                       .DescendantNodes (_ => true)
-                      .OfType<EventFieldDeclarationSyntax>()
+                      .OfType<VariableDeclaratorSyntax>()
+                      .Where(n => n.FirstAncestorOrSelf<EventFieldDeclarationSyntax>() != null)
                       .Where (n => NullabilityTrimmingEquals(_compilation.GetSemanticModel (t).GetDeclaredSymbol (n)!.ToDisplayStringWithStaticModifier(),signature)))
-          .SingleOrDefault();
+          .SingleOrDefault()?.FirstAncestorOrSelf<EventFieldDeclarationSyntax>();
     }
 
     private static bool NullabilityTrimmingEquals (string a, string b)

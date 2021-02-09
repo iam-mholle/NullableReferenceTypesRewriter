@@ -108,7 +108,12 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
       try
       {
-        var rewritten = VisitEventDeclaration ((EventDeclarationSyntax) @event.RewritableSyntaxNode);
+        var rewritten = @event.RewritableSyntaxNode switch
+        {
+            EventDeclarationSyntax e => VisitEventDeclaration(e),
+            EventFieldDeclarationSyntax f => VisitEventFieldDeclaration(f),
+            _ => throw new InvalidOperationException($"{@event.RewritableSyntaxNode.GetType()} is not supported."),
+        };
 
         if (rewritten == null)
           throw new InvalidOperationException ("Could not rewrite event.");
