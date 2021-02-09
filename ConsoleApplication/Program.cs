@@ -68,6 +68,7 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
       var uninitializedPropertyRewriter = new UninitializedPropertyRewriter(additionalRewrites);
       var propertyNullReturnRewriter = new PropertyNullReturnRewriter(additionalRewrites);
       var inheritancePropertyRewriter = new InheritancePropertyRewriter(additionalRewrites);
+      var uninitializedEventRewriter = new UninitializedEventRewriter(additionalRewrites);
 
       graph.ForEachNode(n =>
       {
@@ -82,6 +83,7 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
         n.Rewrite(uninitializedPropertyRewriter);
         n.Rewrite(propertyNullReturnRewriter);
         n.Rewrite(inheritancePropertyRewriter);
+        n.Rewrite(uninitializedEventRewriter);
       }, n => n.GetType() != typeof(ExternalMethod));
 
       for (var i = 0; i < queue.Count; i++)
