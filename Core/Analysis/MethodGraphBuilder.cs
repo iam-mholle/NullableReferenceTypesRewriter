@@ -39,7 +39,7 @@ namespace NullableReferenceTypesRewriter.Analysis
 
       _graph.AddMethod(UniqueSymbolNameGenerator.Generate(symbol), symbol);
 
-      if (TryGetInterfaceMethods(symbol, out var interfaceMethods))
+      if (TryGetInterfaceMembers<IMethodSymbol>(symbol, out var interfaceMethods))
       {
         foreach (var interfaceMethod in interfaceMethods)
         {
@@ -61,15 +61,16 @@ namespace NullableReferenceTypesRewriter.Analysis
       base.VisitMethodDeclaration (node);
     }
 
-    private bool TryGetInterfaceMethods(IMethodSymbol method, out IReadOnlyCollection<IMethodSymbol> interfaceMethods)
+    private bool TryGetInterfaceMembers<TSymbol>(ISymbol method, out IReadOnlyCollection<TSymbol> interfaceMembers)
+        where TSymbol : ISymbol
     {
       var methodsOfContainingType = method.ContainingType.AllInterfaces;
-      interfaceMethods = methodsOfContainingType
-          .SelectMany(@interface => @interface.GetMembers().OfType<IMethodSymbol>())
-          .Where(interfaceMethod => SymbolEqualityComparer.Default.Equals(method.ContainingType.FindImplementationForInterfaceMember(interfaceMethod), method))
+      interfaceMembers = methodsOfContainingType
+          .SelectMany(@interface => @interface.GetMembers().OfType<TSymbol>())
+          .Where(interfaceMember => SymbolEqualityComparer.Default.Equals(method.ContainingType.FindImplementationForInterfaceMember(interfaceMember), method))
           .ToArray();
 
-      return interfaceMethods.Any();
+      return interfaceMembers.Any();
     }
 
     private bool TryGetOverriddenMethod (IMethodSymbol method, out IMethodSymbol? overriddenMethod)
@@ -81,6 +82,18 @@ namespace NullableReferenceTypesRewriter.Analysis
       }
 
       overriddenMethod = null;
+      return false;
+    }
+
+    private bool TryGetOverriddenProperty (IPropertySymbol property, out IPropertySymbol? overriddenProperty)
+    {
+      if (property.IsOverride)
+      {
+        overriddenProperty = property.OverriddenProperty;
+        return true;
+      }
+
+      overriddenProperty = null;
       return false;
     }
 
@@ -224,6 +237,25 @@ namespace NullableReferenceTypesRewriter.Analysis
       if (symbol == null) throw new InvalidOperationException();
 
       _graph.AddProperty(UniqueSymbolNameGenerator.Generate(symbol), symbol);
+
+      if (TryGetInterfaceMembers<IPropertySymbol>(symbol, out var interfaceMethods))
+      {
+        foreach (var interfaceMethod in interfaceMethods)
+        {
+          _graph.AddDependency(
+              UniqueSymbolNameGenerator.Generate(interfaceMethod),
+              UniqueSymbolNameGenerator.Generate(symbol),
+              DependencyType.Inheritance);
+        }
+      }
+
+      if (TryGetOverriddenProperty(symbol, out var overriddenMethod))
+      {
+        _graph.AddDependency (
+            UniqueSymbolNameGenerator.Generate (overriddenMethod!),
+            UniqueSymbolNameGenerator.Generate (symbol),
+            DependencyType.Inheritance);
+      }
 
       base.VisitPropertyDeclaration(node);
     }
