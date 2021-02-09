@@ -18,6 +18,9 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
     public override SyntaxNode? VisitEventFieldDeclaration(EventFieldDeclarationSyntax node)
     {
+      if (node.Ancestors().Any(a => a.IsKind(SyntaxKind.InterfaceDeclaration)))
+        return node;
+
       if (node.Declaration.Variables.All(d => IsInitializedToNotNull(CurrentEvent.SemanticModel, d)))
         return node;
 
@@ -48,7 +51,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
       if (isInitializedToNotNullInCurrent)
         return true;
 
-      if (constructor.Initializer is null)
+      if (constructor.Initializer is null || constructor.Initializer.ThisOrBaseKeyword.IsKind(SyntaxKind.BaseKeyword))
         return false;
 
       var thisConstructorSymbol = semanticModel.GetSymbolInfo(constructor.Initializer).Symbol ?? throw new InvalidOperationException();
