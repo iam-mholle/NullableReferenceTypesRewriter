@@ -18,6 +18,8 @@ namespace NullableReferenceTypesRewriter.UnitTests.Rewriters
       Method,
       Property,
       Field,
+      Event,
+      EventField,
     }
 
     protected enum CompileIn
@@ -40,6 +42,8 @@ namespace NullableReferenceTypesRewriter.UnitTests.Rewriters
           WrapperType.Method => CreateMethodWrapper((BaseMethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration) || n.IsKind (SyntaxKind.ConstructorDeclaration)), semantic),
           WrapperType.Field => CreateFieldWrapper((FieldDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.FieldDeclaration)), semantic),
           WrapperType.Property => CreatePropertyWrapper((PropertyDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.PropertyDeclaration)), semantic),
+          WrapperType.Event => CreateEventWrapper((EventDeclarationSyntax) root.DescendantNodes().First(n => n.IsKind(SyntaxKind.EventDeclaration)), semantic),
+          WrapperType.EventField => CreateEventFieldWrapper((EventFieldDeclarationSyntax) root.DescendantNodes().First(n => n.IsKind(SyntaxKind.EventFieldDeclaration)), semantic),
           _ => throw new ArgumentOutOfRangeException(),
       };
 
@@ -49,6 +53,8 @@ namespace NullableReferenceTypesRewriter.UnitTests.Rewriters
           WrapperType.Method => sut.Rewrite((Method) node),
           WrapperType.Field => sut.Rewrite((Field) node),
           WrapperType.Property => sut.Rewrite((Property) node),
+          WrapperType.Event => sut.Rewrite((Event) node),
+          WrapperType.EventField => sut.Rewrite((Event) node),
           _ => throw new ArgumentOutOfRangeException(),
       };
 
@@ -69,6 +75,8 @@ namespace NullableReferenceTypesRewriter.UnitTests.Rewriters
           WrapperType.Method => CreateMethodWrapper((BaseMethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration) || n.IsKind (SyntaxKind.ConstructorDeclaration)), semantic),
           WrapperType.Field => CreateFieldWrapper((FieldDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.FieldDeclaration)), semantic),
           WrapperType.Property => CreatePropertyWrapper((PropertyDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.PropertyDeclaration)), semantic),
+          WrapperType.Event => CreateEventWrapper((EventDeclarationSyntax) root.DescendantNodes().First(n => n.IsKind(SyntaxKind.EventDeclaration)), semantic),
+          WrapperType.EventField => CreateEventFieldWrapper((EventFieldDeclarationSyntax) root.DescendantNodes().First(n => n.IsKind(SyntaxKind.EventFieldDeclaration)), semantic),
           _ => throw new ArgumentOutOfRangeException(),
       };
 
@@ -78,6 +86,8 @@ namespace NullableReferenceTypesRewriter.UnitTests.Rewriters
           WrapperType.Method => sut.Rewrite((Method) node),
           WrapperType.Field => sut.Rewrite((Field) node),
           WrapperType.Property => sut.Rewrite((Property) node),
+          WrapperType.Event => sut.Rewrite((Event) node),
+          WrapperType.EventField => sut.Rewrite((Event) node),
           _ => throw new ArgumentOutOfRangeException(),
       };
 
@@ -86,6 +96,8 @@ namespace NullableReferenceTypesRewriter.UnitTests.Rewriters
               WrapperType.Method => (CSharpSyntaxNode)((Method) node).MethodDeclaration,
               WrapperType.Field => (CSharpSyntaxNode)((Field) node).FieldDeclarationSyntax,
               WrapperType.Property => (CSharpSyntaxNode)((Property) node).PropertyDeclarationSyntax,
+              WrapperType.Event => (CSharpSyntaxNode)((Event) node).EventDeclarationSyntax!,
+              WrapperType.EventField => (CSharpSyntaxNode)((Event) node).EventFieldDeclarationSyntax!,
               _ => throw new ArgumentOutOfRangeException(),
           }));
     }
@@ -124,6 +136,28 @@ namespace NullableReferenceTypesRewriter.UnitTests.Rewriters
       return new Field(
           new SharedCompilation(semanticModel.Compilation),
           (IFieldSymbol) ModelExtensions.GetDeclaredSymbol(semanticModel, syntax.Declaration.Variables.First())!,
+          parents ?? Array.Empty<Dependency>);
+    }
+
+    protected Event CreateEventFieldWrapper (
+        EventFieldDeclarationSyntax syntax,
+        SemanticModel semanticModel,
+        Func<IReadOnlyCollection<Dependency>>? parents = null)
+    {
+      return new Event(
+          new SharedCompilation(semanticModel.Compilation),
+          (IEventSymbol) ModelExtensions.GetDeclaredSymbol(semanticModel, syntax.Declaration.Variables.First())!,
+          parents ?? Array.Empty<Dependency>);
+    }
+
+    protected Event CreateEventWrapper (
+        EventDeclarationSyntax syntax,
+        SemanticModel semanticModel,
+        Func<IReadOnlyCollection<Dependency>>? parents = null)
+    {
+      return new Event(
+          new SharedCompilation(semanticModel.Compilation),
+          (IEventSymbol) ModelExtensions.GetDeclaredSymbol(semanticModel, syntax)!,
           parents ?? Array.Empty<Dependency>);
     }
   }
