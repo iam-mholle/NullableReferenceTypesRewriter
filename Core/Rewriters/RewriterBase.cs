@@ -21,6 +21,12 @@ namespace NullableReferenceTypesRewriter.Rewriters
     protected Property CurrentProperty = null!;
     protected Event CurrentEvent = null!;
 
+    protected SemanticModel SemanticModel => CurrentMethod?.SemanticModel
+                                             ?? CurrentField?.SemanticModel
+                                             ?? CurrentProperty?.SemanticModel
+                                             ?? CurrentEvent?.SemanticModel
+                                             ?? throw new InvalidOperationException("Not reachable.");
+
     protected RewriterBase (Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
     {
       _additionalRewrites = additionalRewrites;

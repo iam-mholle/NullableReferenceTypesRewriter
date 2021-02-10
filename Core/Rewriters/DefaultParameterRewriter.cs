@@ -34,6 +34,9 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
       foreach (var (parameter, index) in node.ParameterList.Parameters.Select((p, i) => (p, i)))
       {
+        if (parameter.Type is {} && IsValueType(semanticModel, parameter.Type))
+          continue;
+
         if (IsParameterDefaultNullLiteral(parameter)
             || IsParameterDefaultDefaultLiteral(semanticModel, parameter))
         {
@@ -69,5 +72,15 @@ namespace NullableReferenceTypesRewriter.Rewriters
     private static bool IsParameterDefaultDefaultExpression(SemanticModel semanticModel, ParameterSyntax parameterSyntax)
       => semanticModel.GetTypeInfo(parameterSyntax.Type!).Type!.IsReferenceType
          && parameterSyntax.Default is { Value: DefaultExpressionSyntax _ };
+
+    private static bool IsValueType (SemanticModel semanticModel, TypeSyntax declaration)
+    {
+      if (declaration is ArrayTypeSyntax)
+        return false;
+
+      var typeSymbol = semanticModel.GetTypeInfo (declaration).Type as INamedTypeSymbol;
+
+      return typeSymbol == null || typeSymbol.IsValueType;
+    }
   }
 }
