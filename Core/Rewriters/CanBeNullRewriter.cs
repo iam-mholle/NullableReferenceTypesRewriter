@@ -61,6 +61,16 @@ namespace NullableReferenceTypesRewriter.Rewriters
       return node;
     }
 
+    protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(INode node)
+    {
+      var children = node.Children.Select(d => d.To);
+      var parents = node.Parents.Select(d => d.From);
+      return children.Concat(parents)
+          .OfType<IRewritable>()
+          .Select(n => (n, RewriteCapability.ParameterChange | RewriteCapability.ReturnValueChange))
+          .ToArray();
+    }
+
     private static bool HasCanBeNullAttribute (MemberDeclarationSyntax node)
     {
       return node.AttributeLists.SelectMany (list => list.Attributes)
