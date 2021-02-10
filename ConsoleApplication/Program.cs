@@ -101,6 +101,9 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
             node.Rewrite(localDeclarationRewriter);
             node.Rewrite(methodArgumentRewriter);
             node.Rewrite(inheritanceParameterRewriter);
+            node.Rewrite(uninitializedFieldRewriter);
+            node.Rewrite(uninitializedPropertyRewriter);
+            node.Rewrite(uninitializedEventRewriter);
           }
           else if ((rewriteCapability & RewriteCapability.ReturnValueChange) == RewriteCapability.ReturnValueChange)
           {
