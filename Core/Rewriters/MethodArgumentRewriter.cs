@@ -74,8 +74,8 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
     protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(INode method)
     {
-      return method.Parents
-          .Select(p => p.From)
+      return method.Children
+          .Select(p => p.To)
           .OfType<IRewritable>()
           .Select(r => (r, RewriteCapability.ParameterChange))
           .ToArray();
