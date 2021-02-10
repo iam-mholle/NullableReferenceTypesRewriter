@@ -57,6 +57,7 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
 
       Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites = (b, c) => queue.Add((b, c));
 
+      var canBeNullRewriter = new CanBeNullRewriter(additionalRewrites);
       var nullReturnRewriter = new NullReturnRewriter(additionalRewrites);
       var castExpressionRewriter = new CastExpressionRewriter (additionalRewrites);
       var localDeclarationRewriter = new LocalDeclarationRewriter (additionalRewrites);
@@ -72,6 +73,7 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
 
       graph.ForEachNode(n =>
       {
+        n.Rewrite(canBeNullRewriter);
         n.Rewrite(nullReturnRewriter);
         n.Rewrite(castExpressionRewriter);
         n.Rewrite(localDeclarationRewriter);

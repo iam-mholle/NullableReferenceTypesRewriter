@@ -45,6 +45,22 @@ namespace NullableReferenceTypesRewriter.Rewriters
       return resultNode;
     }
 
+    public override SyntaxNode? VisitPropertyDeclaration(PropertyDeclarationSyntax node)
+    {
+      if (HasCanBeNullAttribute(node))
+        return node.WithType(NullUtilities.ToNullable(node.Type));
+
+      return node;
+    }
+
+    public override SyntaxNode? VisitFieldDeclaration(FieldDeclarationSyntax node)
+    {
+      if (HasCanBeNullAttribute(node))
+        return node.WithDeclaration(node.Declaration.WithType(NullUtilities.ToNullable(node.Declaration.Type)));
+
+      return node;
+    }
+
     private static bool HasCanBeNullAttribute (MemberDeclarationSyntax node)
     {
       return node.AttributeLists.SelectMany (list => list.Attributes)
