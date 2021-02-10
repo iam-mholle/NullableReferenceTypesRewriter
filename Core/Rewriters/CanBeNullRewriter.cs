@@ -45,6 +45,29 @@ namespace NullableReferenceTypesRewriter.Rewriters
       return resultNode;
     }
 
+    public override SyntaxNode? VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
+    {
+      var resultParameterList = node.ParameterList;
+
+      foreach (var (parameter, index) in node.ParameterList.Parameters.Select((p, i) => (p, i)))
+      {
+        if (parameter.Type is {} && IsValueType(SemanticModel, parameter.Type))
+          continue;
+
+        if (HasCanBeNullAttribute(parameter))
+        {
+          resultParameterList = resultParameterList.ReplaceNode(resultParameterList.Parameters[index].Type!, NullUtilities.ToNullable(parameter.Type!));
+        }
+      }
+
+      if (resultParameterList != node.ParameterList)
+      {
+        return node.WithParameterList(resultParameterList);
+      }
+
+      return node;
+    }
+
     public override SyntaxNode? VisitPropertyDeclaration(PropertyDeclarationSyntax node)
     {
       if (HasCanBeNullAttribute(node))
