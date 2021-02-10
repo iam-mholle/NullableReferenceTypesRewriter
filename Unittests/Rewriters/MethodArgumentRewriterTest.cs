@@ -11,6 +11,40 @@ namespace NullableReferenceTypesRewriter.UnitTests.Rewriters
   public class MethodArgumentRewriterTest : RewriterTestBase<MethodArgumentRewriter>
   {
     [Test]
+    public void SingleParameter_CtorNullArgument_Nullable()
+    {
+      //language=C#
+      const string expected = @"
+public A(string? something)
+{
+}
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
+          "A",
+          //language=C#
+          @"
+public A(string something)
+{
+}
+
+public void CallAboveMethod()
+{
+  new A(null);
+}
+");
+      Method method = null!;
+      var callingSyntax = (MethodDeclarationSyntax) root.DescendantNodes ().Last(n => n.IsKind (SyntaxKind.MethodDeclaration));
+      var callingMethod = CreateMethodWrapper(callingSyntax, semantic);
+      var syntax = (BaseMethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.ConstructorDeclaration));
+      method = CreateMethodWrapper (syntax, semantic, () => new []{ new Dependency(() => callingMethod, () => method, DependencyType.Usage) });
+      var sut = new MethodArgumentRewriter((b, c) => { });
+
+      var result = sut.Rewrite (method);
+
+      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+    }
+
+    [Test]
     public void SingleParameter_NullArgument_Nullable()
     {
       //language=C#
