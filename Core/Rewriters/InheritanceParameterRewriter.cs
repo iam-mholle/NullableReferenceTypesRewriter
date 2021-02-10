@@ -20,7 +20,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
       if (node.ParameterList.Parameters.Count == 0)
         return node;
 
-      var parents = CurrentMethod.Parents
+      var parents = CurrentNode.Parents
           .Where(d => d.DependencyType == DependencyType.Inheritance)
           .Select(d => d.From)
           .OfType<Method>();
@@ -38,13 +38,13 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
         if (existingParameter.HasNotNullAttribute())
         {
-          Console.WriteLine($"ERROR: Trying to annotate NotNull parameter {existingParameter.ToString()} in {CurrentMethod}");
+          Console.WriteLine($"ERROR: Trying to annotate NotNull parameter {existingParameter.ToString()} in {CurrentNode}");
         }
         else
         {
           newList = newList.ReplaceNode(
               existingParameter,
-              existingParameter.WithType (NullUtilities.ToNullableWithGenericsCheck (CurrentMethod.SemanticModel, node, existingParameter.Type!)));
+              existingParameter.WithType (NullUtilities.ToNullableWithGenericsCheck (SemanticModel, node, existingParameter.Type!)));
         }
       }
 

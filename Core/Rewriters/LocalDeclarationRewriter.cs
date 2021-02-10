@@ -29,11 +29,11 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
       var type = node.Declaration.Type;
 
-      var typeInfo = CurrentMethod.SemanticModel.GetTypeInfo(type);
+      var typeInfo = SemanticModel.GetTypeInfo(type);
 
       var isNullable = node.Declaration.Variables
           .Where (variable => variable.Initializer != null)
-          .Any (variable => NullUtilities.CanBeNull (variable.Initializer!.Value, CurrentMethod.SemanticModel));
+          .Any (variable => NullUtilities.CanBeNull (variable.Initializer!.Value, SemanticModel));
 
       isNullable |= typeInfo.Type!.IsReferenceType
                     && node.Declaration.Variables.Any(v => v.Initializer is null);

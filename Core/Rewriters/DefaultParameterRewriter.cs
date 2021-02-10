@@ -17,12 +17,12 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
     public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
     {
-      return RewriteMethod(CurrentMethod.SemanticModel, node);
+      return RewriteMethod(SemanticModel, node);
     }
 
     public override SyntaxNode? VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
     {
-      return RewriteMethod(CurrentMethod.SemanticModel, node);
+      return RewriteMethod(SemanticModel, node);
     }
 
     private static SyntaxNode RewriteMethod(SemanticModel semanticModel, BaseMethodDeclarationSyntax node)

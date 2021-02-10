@@ -22,12 +22,11 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
     public override SyntaxNode? VisitMethodDeclaration (MethodDeclarationSyntax node)
     {
-      var semanticModel = CurrentMethod.SemanticModel;
-
-      if (MayReturnNull(node, semanticModel!))
+      if (MayReturnNull(node, SemanticModel))
       {
-        return NullUtilities.ToNullReturning (semanticModel, node);
+        return NullUtilities.ToNullReturning (SemanticModel, node);
       }
+
       return node;
     }
 

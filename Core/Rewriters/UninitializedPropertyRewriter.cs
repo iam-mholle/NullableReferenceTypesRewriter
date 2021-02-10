@@ -28,33 +28,31 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
     public override SyntaxNode? VisitPropertyDeclaration(PropertyDeclarationSyntax node)
     {
-      var semanticModel = CurrentProperty.SemanticModel;
-
-      if (node.Type.IsValueType(semanticModel))
+      if (node.Type.IsValueType(SemanticModel))
         return node;
 
       if (node.IsAbstract())
         return node;
 
-      if (IsNullable(semanticModel, node))
+      if (IsNullable(SemanticModel, node))
         return node;
 
-      if (node.IsInitializedToNotNull(semanticModel))
+      if (node.IsInitializedToNotNull(SemanticModel))
         return node;
 
-      if (node.IsInitializedToNull(semanticModel))
+      if (node.IsInitializedToNull(SemanticModel))
         return node.WithType(NullUtilities.ToNullable(node.Type));
 
       if (node.Ancestors().FirstOrDefault(a => a.IsKind(SyntaxKind.InterfaceDeclaration)) != null)
         return node;
 
-      var classSyntax = (ClassDeclarationSyntax) node.Ancestors().First(a => a.IsKind(SyntaxKind.ClassDeclaration));
+      var classSyntax = (TypeDeclarationSyntax) node.Ancestors().First(a => a.IsKind(SyntaxKind.ClassDeclaration) || a.IsKind(SyntaxKind.StructDeclaration));
       var constructors = classSyntax.ChildNodes()
           .Where(n => n.IsKind(SyntaxKind.ConstructorDeclaration))
           .Cast<ConstructorDeclarationSyntax>()
           .ToArray();
 
-      var isInitializedToNotNull = constructors.All(c => PropertyInitializedToNotNullInCtorChain(semanticModel, c, node));
+      var isInitializedToNotNull = constructors.All(c => PropertyInitializedToNotNullInCtorChain(SemanticModel, c, node));
 
       if (node.IsAutoProperty() && (constructors.Length == 0 || !isInitializedToNotNull))
         return node.WithType(NullUtilities.ToNullable(node.Type));
@@ -69,7 +67,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
       if (isInitializedToNotNullInCurrent)
         return true;
 
-      if (constructor.Initializer is null)
+      if (constructor.Initializer is null || constructor.Initializer.ThisOrBaseKeyword.IsKind(SyntaxKind.BaseKeyword))
         return false;
 
       var thisConstructorSymbol = semanticModel.GetSymbolInfo(constructor.Initializer).Symbol ?? throw new InvalidOperationException();

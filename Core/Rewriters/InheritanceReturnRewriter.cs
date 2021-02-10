@@ -20,7 +20,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
       if (node.ParameterList.Parameters.Count == 0)
         return node;
 
-      var isAnyChildNullable = CurrentMethod.Children
+      var isAnyChildNullable = CurrentNode.Children
           .Where(d => d.DependencyType == DependencyType.Inheritance)
           .Select(d => d.To)
           .OfType<Method>()

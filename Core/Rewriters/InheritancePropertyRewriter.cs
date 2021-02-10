@@ -20,9 +20,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
       if (node.Type is NullableTypeSyntax)
         return node;
 
-      var current = CurrentProperty;
-
-      if (current.Children
+      if (CurrentNode.Children
           .Where(c => c.DependencyType == DependencyType.Inheritance)
           .Select(c => c.To)
           .OfType<Property>()

@@ -22,11 +22,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
       if (type is NullableTypeSyntax)
         return node;
 
-      var semanticModel = CurrentMethod?.SemanticModel
-          ?? CurrentProperty?.SemanticModel
-          ?? CurrentField.SemanticModel;
-
-      return NullUtilities.CanBeNull (node.Expression, semanticModel)
+      return NullUtilities.CanBeNull (node.Expression, SemanticModel)
           ? node.WithType (ToNullableWithFittingContext (type))
           : node;
     }
@@ -58,11 +54,11 @@ namespace NullableReferenceTypesRewriter.Rewriters
             .Cast<ClassDeclarationSyntax>()
             .First();
 
-        annotator = () => NullUtilities.ToNullableWithGenericsCheck(CurrentField.SemanticModel, containingClass, typeSyntax);
+        annotator = () => NullUtilities.ToNullableWithGenericsCheck(SemanticModel, containingClass, typeSyntax);
       }
       else
       {
-        annotator = () => NullUtilities.ToNullableWithGenericsCheck(CurrentMethod.SemanticModel, containingMethod, typeSyntax);
+        annotator = () => NullUtilities.ToNullableWithGenericsCheck(SemanticModel, containingMethod, typeSyntax);
       }
 
       return annotator();

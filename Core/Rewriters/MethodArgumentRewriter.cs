@@ -20,8 +20,8 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
     public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
     {
-      var symbol = ModelExtensions.GetDeclaredSymbol(CurrentMethod.SemanticModel, node);
-      var parents = CurrentMethod.Parents.Select(p => p.From).ToArray();
+      var symbol = ModelExtensions.GetDeclaredSymbol(SemanticModel, node);
+      var parents = CurrentNode.Parents.Select(p => p.From).ToArray();
       var parametersToAnnotate = new List<int>();
       for (var i = 0; i < node.ParameterList.Parameters.Count; i++)
       {
@@ -49,7 +49,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
         if (existingParameter.HasNotNullAttribute())
         {
-          Console.WriteLine($"ERROR: Trying to annotate NotNull parameter {existingParameter.ToString()} in {CurrentMethod}");
+          Console.WriteLine($"ERROR: Trying to annotate NotNull parameter {existingParameter.ToString()} in {CurrentNode}");
         }
         else
         {

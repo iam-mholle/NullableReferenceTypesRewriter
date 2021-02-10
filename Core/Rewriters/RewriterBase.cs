@@ -27,6 +27,11 @@ namespace NullableReferenceTypesRewriter.Rewriters
                                              ?? CurrentEvent?.SemanticModel
                                              ?? throw new InvalidOperationException("Not reachable.");
 
+    protected INode CurrentNode => (INode?) CurrentMethod
+                                   ?? (INode?) CurrentProperty
+                                   ?? (INode?) CurrentField
+                                   ?? CurrentEvent;
+
     protected RewriterBase (Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
     {
       _additionalRewrites = additionalRewrites;

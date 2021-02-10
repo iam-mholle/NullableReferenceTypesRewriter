@@ -25,37 +25,35 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
     public override SyntaxNode? VisitFieldDeclaration (FieldDeclarationSyntax node)
     {
-      var semanticModel = CurrentField.SemanticModel;
-
-      if (IsValueType(semanticModel, node))
+      if (IsValueType(SemanticModel, node))
         return node;
 
-      if (IsNullable(semanticModel, node))
+      if (IsNullable(SemanticModel, node))
         return node;
 
-      if (node.Declaration.Variables.All(d => d.IsInitializedToNotNull(semanticModel)))
+      if (node.Declaration.Variables.All(d => d.IsInitializedToNotNull(SemanticModel)))
         return node;
 
-      var classSyntax = (ClassDeclarationSyntax) node.Ancestors().First(a => a.IsKind(SyntaxKind.ClassDeclaration));
+      var classSyntax = (TypeDeclarationSyntax) node.Ancestors().First(a => a.IsKind(SyntaxKind.ClassDeclaration) || a.IsKind(SyntaxKind.StructDeclaration));
 
-      if (node.Declaration.Variables.Any(d => d.IsInitializedToNull(semanticModel)))
+      if (node.Declaration.Variables.Any(d => d.IsInitializedToNull(SemanticModel)))
         return ToNullable(node);
 
-      var symbol = semanticModel.GetDeclaredSymbol(node.Declaration.Variables.First());
+      var symbol = SemanticModel.GetDeclaredSymbol(node.Declaration.Variables.First());
 
       var constructors = classSyntax.ChildNodes()
           .Where(n => n.IsKind(SyntaxKind.ConstructorDeclaration))
           .Cast<ConstructorDeclarationSyntax>()
           .ToArray();
 
-      var isInitializedToNotNull = constructors.All(c => VariableInitializedToNotNullInCtorChain(semanticModel, c, node.Declaration.Variables.First()));
+      var isInitializedToNotNull = constructors.All(c => VariableInitializedToNotNullInCtorChain(SemanticModel, c, node.Declaration.Variables.First()));
 
       if (constructors.Length == 0 || !isInitializedToNotNull)
         return ToNullable(node);
 
       return node;
 
-      SyntaxNode? ToNullable(FieldDeclarationSyntax node) => node.WithDeclaration(node.Declaration.WithType(NullUtilities.ToNullableWithGenericsCheck(CurrentField.SemanticModel, classSyntax, node.Declaration.Type)));
+      SyntaxNode? ToNullable(FieldDeclarationSyntax node) => node.WithDeclaration(node.Declaration.WithType(NullUtilities.ToNullable(node.Declaration.Type)));
     }
 
     protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(INode method)
@@ -74,7 +72,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
       if (isInitializedToNotNullInCurrent)
         return true;
 
-      if (constructor.Initializer is null)
+      if (constructor.Initializer is null || constructor.Initializer.ThisOrBaseKeyword.IsKind(SyntaxKind.BaseKeyword))
         return false;
 
       var thisConstructorSymbol = semanticModel.GetSymbolInfo(constructor.Initializer).Symbol ?? throw new InvalidOperationException();

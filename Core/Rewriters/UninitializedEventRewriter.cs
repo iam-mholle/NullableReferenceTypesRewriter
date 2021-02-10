@@ -21,12 +21,12 @@ namespace NullableReferenceTypesRewriter.Rewriters
       if (node.Ancestors().Any(a => a.IsKind(SyntaxKind.InterfaceDeclaration)))
         return node;
 
-      if (node.Declaration.Variables.All(d => d.IsInitializedToNotNull(CurrentEvent.SemanticModel)))
+      if (node.Declaration.Variables.All(d => d.IsInitializedToNotNull(SemanticModel)))
         return node;
 
-      var classSyntax = (ClassDeclarationSyntax) node.Ancestors().First(a => a.IsKind(SyntaxKind.ClassDeclaration));
+      var classSyntax = (TypeDeclarationSyntax) node.Ancestors().First(a => a.IsKind(SyntaxKind.ClassDeclaration) || a.IsKind(SyntaxKind.StructDeclaration));
 
-      if (node.Declaration.Variables.Any(d => d.IsInitializedToNull(CurrentEvent.SemanticModel)))
+      if (node.Declaration.Variables.Any(d => d.IsInitializedToNull(SemanticModel)))
         return ToNullable(node);
 
       var constructors = classSyntax.ChildNodes()
@@ -34,14 +34,14 @@ namespace NullableReferenceTypesRewriter.Rewriters
           .Cast<ConstructorDeclarationSyntax>()
           .ToArray();
 
-      var isInitializedToNotNull = constructors.All(c => VariableInitializedToNotNullInCtorChain(CurrentEvent.SemanticModel, c, node.Declaration.Variables.First()));
+      var isInitializedToNotNull = constructors.All(c => VariableInitializedToNotNullInCtorChain(SemanticModel, c, node.Declaration.Variables.First()));
 
       if (constructors.Length == 0 || !isInitializedToNotNull)
         return ToNullable(node);
 
       return node;
 
-      SyntaxNode? ToNullable(EventFieldDeclarationSyntax node) => node.WithDeclaration(node.Declaration.WithType(NullUtilities.ToNullableWithGenericsCheck(CurrentEvent.SemanticModel, classSyntax, node.Declaration.Type)));
+      SyntaxNode? ToNullable(EventFieldDeclarationSyntax node) => node.WithDeclaration(node.Declaration.WithType(NullUtilities.ToNullable(node.Declaration.Type)));
     }
 
     private bool VariableInitializedToNotNullInCtorChain(SemanticModel semanticModel, ConstructorDeclarationSyntax constructor, VariableDeclaratorSyntax variable)

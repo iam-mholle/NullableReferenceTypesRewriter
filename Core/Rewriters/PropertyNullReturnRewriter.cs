@@ -23,20 +23,18 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
     public override SyntaxNode? VisitPropertyDeclaration(PropertyDeclarationSyntax node)
     {
-      var semanticModel = CurrentProperty.SemanticModel;
-
-      if (node.IsExpressionBodied() && NullUtilities.CanBeNull(node.ExpressionBody!.Expression, semanticModel))
+      if (node.IsExpressionBodied() && NullUtilities.CanBeNull(node.ExpressionBody!.Expression, SemanticModel))
       {
         var containingClass = node.FirstAncestorOrSelf<ClassDeclarationSyntax>();
-        return node.WithType(NullUtilities.ToNullableWithGenericsCheck(semanticModel, containingClass!, node.Type));
+        return node.WithType(NullUtilities.ToNullableWithGenericsCheck(SemanticModel, containingClass!, node.Type));
       }
 
       if (node.HasNonAutoGetter())
       {
         var getter = node.AccessorList!.Accessors.Single(a => a.Keyword.IsKind(SyntaxKind.GetKeyword));
 
-        var hasNullReturningExpressionBody = getter.ExpressionBody != null && NullUtilities.CanBeNull(getter.ExpressionBody.Expression, semanticModel);
-        var hasNullReturningStatementBody = getter.Body != null && NullUtilities.ReturnsNull(getter.Body.Statements, semanticModel);
+        var hasNullReturningExpressionBody = getter.ExpressionBody != null && NullUtilities.CanBeNull(getter.ExpressionBody.Expression, SemanticModel);
+        var hasNullReturningStatementBody = getter.Body != null && NullUtilities.ReturnsNull(getter.Body.Statements, SemanticModel);
         var isNullReturning = hasNullReturningExpressionBody || hasNullReturningStatementBody;
 
         if (isNullReturning)
@@ -44,7 +42,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
           var containingClass = node.FirstAncestorOrSelf<ClassDeclarationSyntax>();
           if (containingClass != null)
           {
-            return node.WithType(NullUtilities.ToNullableWithGenericsCheck(semanticModel, containingClass, node.Type));
+            return node.WithType(NullUtilities.ToNullableWithGenericsCheck(SemanticModel, containingClass, node.Type));
           }
         }
       }
