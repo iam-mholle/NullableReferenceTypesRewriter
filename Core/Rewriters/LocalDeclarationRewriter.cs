@@ -24,7 +24,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
       if (node.Declaration.Type is NullableTypeSyntax)
         return node;
 
-      if (IsValueType(SemanticModel, node.Declaration.Type))
+      if (node.Declaration.Type.IsValueType(SemanticModel))
         return node;
 
       var type = node.Declaration.Type;
@@ -50,16 +50,6 @@ namespace NullableReferenceTypesRewriter.Rewriters
           .OfType<IRewritable>()
           .Select(r => (r, RewriteCapability.ParameterChange))
           .ToArray();
-    }
-
-    private bool IsValueType (SemanticModel semanticModel, TypeSyntax declaration)
-    {
-      if (declaration is ArrayTypeSyntax)
-        return false;
-
-      var typeSymbol = semanticModel.GetTypeInfo (declaration).Type as INamedTypeSymbol;
-
-      return typeSymbol == null || typeSymbol.IsValueType;
     }
   }
 }

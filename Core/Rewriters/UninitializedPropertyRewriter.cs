@@ -30,19 +30,19 @@ namespace NullableReferenceTypesRewriter.Rewriters
     {
       var semanticModel = CurrentProperty.SemanticModel;
 
-      if (IsValueType(semanticModel, node))
+      if (node.Type.IsValueType(semanticModel))
         return node;
 
-      if (IsAbstract(node))
+      if (node.IsAbstract())
         return node;
 
       if (IsNullable(semanticModel, node))
         return node;
 
-      if (IsInitializedToNotNull(semanticModel, node))
+      if (node.IsInitializedToNotNull(semanticModel))
         return node;
 
-      if (IsInitializedToNull(semanticModel, node))
+      if (node.IsInitializedToNull(semanticModel))
         return node.WithType(NullUtilities.ToNullable(node.Type));
 
       if (node.Ancestors().FirstOrDefault(a => a.IsKind(SyntaxKind.InterfaceDeclaration)) != null)
@@ -56,7 +56,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
       var isInitializedToNotNull = constructors.All(c => PropertyInitializedToNotNullInCtorChain(semanticModel, c, node));
 
-      if (IsAutoProperty(node) && (constructors.Length == 0 || !isInitializedToNotNull))
+      if (node.IsAutoProperty() && (constructors.Length == 0 || !isInitializedToNotNull))
         return node.WithType(NullUtilities.ToNullable(node.Type));
 
       return base.VisitPropertyDeclaration(node);
@@ -101,48 +101,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
       return propertyAssignments.All(a => !NullUtilities.CanBeNull(a.Right, semanticModel));
     }
 
-    private bool IsValueType(SemanticModel semanticModel, PropertyDeclarationSyntax declaration)
-      => IsValueType(semanticModel, declaration.Type);
-
-    private bool IsValueType (SemanticModel semanticModel, TypeSyntax declaration)
-    {
-      if (declaration is ArrayTypeSyntax)
-        return false;
-
-      var typeSymbol = semanticModel.GetTypeInfo (declaration).Type as INamedTypeSymbol;
-
-      return typeSymbol == null || (typeSymbol.IsValueType);
-    }
-
     private bool IsNullable(SemanticModel semanticModel, PropertyDeclarationSyntax syntax)
       => semanticModel.GetDeclaredSymbol(syntax)?.Type.NullableAnnotation == NullableAnnotation.Annotated;
-
-    private bool IsAbstract(PropertyDeclarationSyntax syntax)
-      => syntax.Modifiers.Any(SyntaxKind.AbstractKeyword);
-
-    private bool IsInitializedToNull (SemanticModel semanticModel, PropertyDeclarationSyntax propertyDeclaration)
-    {
-      if (propertyDeclaration.Initializer != null)
-      {
-        return NullUtilities.CanBeNull (propertyDeclaration.Initializer.Value, semanticModel);
-      }
-
-      return false;
-    }
-
-    private bool IsInitializedToNotNull (SemanticModel semanticModel, PropertyDeclarationSyntax propertyDeclaration)
-    {
-      if (propertyDeclaration.Initializer != null)
-      {
-        return !NullUtilities.CanBeNull (propertyDeclaration.Initializer.Value, semanticModel);
-      }
-
-      return false;
-    }
-
-    private bool IsAutoProperty(PropertyDeclarationSyntax propertyDeclarationSyntax)
-    {
-      return propertyDeclarationSyntax.AccessorList?.Accessors.All(a => a.Body is null) ?? false;
-    }
   }
 }

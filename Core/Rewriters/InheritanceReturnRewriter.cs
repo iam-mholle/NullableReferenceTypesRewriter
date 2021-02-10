@@ -34,13 +34,6 @@ namespace NullableReferenceTypesRewriter.Rewriters
       return node;
     }
 
-    private bool IsReturnTypeNullable(Method method)
-    {
-      var syntax = method.MethodDeclaration;
-
-      return syntax is MethodDeclarationSyntax { ReturnType: NullableTypeSyntax _ };
-    }
-
     protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(INode method)
     {
       return method.Parents
@@ -48,6 +41,13 @@ namespace NullableReferenceTypesRewriter.Rewriters
           .OfType<IRewritable>()
           .Select(r => (r, RewriteCapability.ParameterChange))
           .ToArray();
+    }
+
+    private bool IsReturnTypeNullable(Method method)
+    {
+      var syntax = method.MethodDeclaration;
+
+      return syntax is MethodDeclarationSyntax { ReturnType: NullableTypeSyntax _ };
     }
   }
 }

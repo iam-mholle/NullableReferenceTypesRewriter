@@ -33,12 +33,12 @@ namespace NullableReferenceTypesRewriter.Rewriters
       if (IsNullable(semanticModel, node))
         return node;
 
-      if (node.Declaration.Variables.All(d => IsInitializedToNotNull(semanticModel, d)))
+      if (node.Declaration.Variables.All(d => d.IsInitializedToNotNull(semanticModel)))
         return node;
 
       var classSyntax = (ClassDeclarationSyntax) node.Ancestors().First(a => a.IsKind(SyntaxKind.ClassDeclaration));
 
-      if (node.Declaration.Variables.Any(d => IsInitializedToNull(semanticModel, d)))
+      if (node.Declaration.Variables.Any(d => d.IsInitializedToNull(semanticModel)))
         return ToNullable(node);
 
       var symbol = semanticModel.GetDeclaredSymbol(node.Declaration.Variables.First());
@@ -99,39 +99,9 @@ namespace NullableReferenceTypesRewriter.Rewriters
     }
 
     private bool IsValueType(SemanticModel semanticModel, FieldDeclarationSyntax declaration)
-      => IsValueType(semanticModel, declaration.Declaration.Type);
-
-    private bool IsValueType (SemanticModel semanticModel, TypeSyntax declaration)
-    {
-      if (declaration is ArrayTypeSyntax)
-        return false;
-
-      var typeSymbol = semanticModel.GetTypeInfo (declaration).Type as INamedTypeSymbol;
-
-      return typeSymbol == null || typeSymbol.IsValueType;
-    }
+      => declaration.Declaration.Type.IsValueType(semanticModel);
 
     private bool IsNullable(SemanticModel semanticModel, FieldDeclarationSyntax syntax)
       => (semanticModel.GetDeclaredSymbol(syntax.Declaration.Variables.First()) as IFieldSymbol)?.Type.NullableAnnotation == NullableAnnotation.Annotated;
-
-    private bool IsInitializedToNull (SemanticModel semanticModel, VariableDeclaratorSyntax variableDeclarator)
-    {
-      if (variableDeclarator.Initializer != null)
-      {
-        return NullUtilities.CanBeNull (variableDeclarator.Initializer.Value, semanticModel);
-      }
-
-      return false;
-    }
-
-    private bool IsInitializedToNotNull (SemanticModel semanticModel, VariableDeclaratorSyntax variableDeclarator)
-    {
-      if (variableDeclarator.Initializer != null)
-      {
-        return !NullUtilities.CanBeNull (variableDeclarator.Initializer.Value, semanticModel);
-      }
-
-      return false;
-    }
   }
 }

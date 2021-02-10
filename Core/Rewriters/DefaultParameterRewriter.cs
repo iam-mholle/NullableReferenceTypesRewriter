@@ -34,15 +34,15 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
       foreach (var (parameter, index) in node.ParameterList.Parameters.Select((p, i) => (p, i)))
       {
-        if (parameter.Type is {} && IsValueType(semanticModel, parameter.Type))
+        if (parameter.Type is {} && parameter.Type.IsValueType(semanticModel))
           continue;
 
-        if (IsParameterDefaultNullLiteral(parameter)
-            || IsParameterDefaultDefaultLiteral(semanticModel, parameter))
+        if (parameter.IsDefaultNullLiteral()
+            || parameter.IsDefaultDefaultLiteral())
         {
           res = res.ReplaceNode(res.Parameters[index].Type!, NullUtilities.ToNullable(parameter.Type!));
         }
-        else if (IsParameterDefaultDefaultExpression(semanticModel, parameter))
+        else if (parameter.IsDefaultDefaultExpression())
         {
           res = res.ReplaceNode(res.Parameters[index].Type!, NullUtilities.ToNullable(parameter.Type!));
           var defaultExpression = (DefaultExpressionSyntax) res.Parameters[index].Default!.Value;
@@ -60,27 +60,6 @@ namespace NullableReferenceTypesRewriter.Rewriters
           .OfType<IRewritable>()
           .Select(r => (r, RewriteCapability.ParameterChange))
           .ToArray();
-    }
-
-    private static bool IsParameterDefaultNullLiteral(ParameterSyntax parameterSyntax)
-      => parameterSyntax.Default is { Value: LiteralExpressionSyntax { Token: { Text: "null" } } };
-
-    private static bool IsParameterDefaultDefaultLiteral(SemanticModel semanticModel, ParameterSyntax parameterSyntax)
-      => semanticModel.GetTypeInfo(parameterSyntax.Type!).Type!.IsReferenceType
-         && parameterSyntax.Default is { Value: LiteralExpressionSyntax { Token: { Text: "default" } } };
-
-    private static bool IsParameterDefaultDefaultExpression(SemanticModel semanticModel, ParameterSyntax parameterSyntax)
-      => semanticModel.GetTypeInfo(parameterSyntax.Type!).Type!.IsReferenceType
-         && parameterSyntax.Default is { Value: DefaultExpressionSyntax _ };
-
-    private static bool IsValueType (SemanticModel semanticModel, TypeSyntax declaration)
-    {
-      if (declaration is ArrayTypeSyntax)
-        return false;
-
-      var typeSymbol = semanticModel.GetTypeInfo (declaration).Type as INamedTypeSymbol;
-
-      return typeSymbol == null || typeSymbol.IsValueType;
     }
   }
 }

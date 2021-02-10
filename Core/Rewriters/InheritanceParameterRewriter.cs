@@ -51,16 +51,6 @@ namespace NullableReferenceTypesRewriter.Rewriters
       return node.WithParameterList(newList);
     }
 
-    public bool IsParameterNullable(Method method, int argumentIndex)
-    {
-      var syntax = method.MethodDeclaration;
-
-      if (syntax.ParameterList.Parameters.Count == 0)
-        return false;
-
-      return syntax.ParameterList.Parameters[argumentIndex].Type is NullableTypeSyntax;
-    }
-
     protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(INode method)
     {
       return method.Children
@@ -68,6 +58,16 @@ namespace NullableReferenceTypesRewriter.Rewriters
           .OfType<IRewritable>()
           .Select(r => (r, RewriteCapability.ParameterChange))
           .ToArray();
+    }
+
+    private bool IsParameterNullable(Method method, int argumentIndex)
+    {
+      var syntax = method.MethodDeclaration;
+
+      if (syntax.ParameterList.Parameters.Count == 0)
+        return false;
+
+      return syntax.ParameterList.Parameters[argumentIndex].Type is NullableTypeSyntax;
     }
   }
 }

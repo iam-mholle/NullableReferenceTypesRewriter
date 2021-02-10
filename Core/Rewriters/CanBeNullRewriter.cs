@@ -19,7 +19,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
     {
       var resultNode = node;
 
-      if (HasCanBeNullAttribute(node))
+      if (node.HasCanBeNullAttribute())
       {
         resultNode = resultNode.WithReturnType(NullUtilities.ToNullable(node.ReturnType));
       }
@@ -28,10 +28,10 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
       foreach (var (parameter, index) in node.ParameterList.Parameters.Select((p, i) => (p, i)))
       {
-        if (parameter.Type is {} && IsValueType(SemanticModel, parameter.Type))
+        if (parameter.Type is {} && parameter.Type.IsValueType(SemanticModel))
           continue;
 
-        if (HasCanBeNullAttribute(parameter))
+        if (parameter.HasCanBeNullAttribute())
         {
           resultParameterList = resultParameterList.ReplaceNode(resultParameterList.Parameters[index].Type!, NullUtilities.ToNullable(parameter.Type!));
         }
@@ -51,10 +51,10 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
       foreach (var (parameter, index) in node.ParameterList.Parameters.Select((p, i) => (p, i)))
       {
-        if (parameter.Type is {} && IsValueType(SemanticModel, parameter.Type))
+        if (parameter.Type is {} && parameter.Type.IsValueType(SemanticModel))
           continue;
 
-        if (HasCanBeNullAttribute(parameter))
+        if (parameter.HasCanBeNullAttribute())
         {
           resultParameterList = resultParameterList.ReplaceNode(resultParameterList.Parameters[index].Type!, NullUtilities.ToNullable(parameter.Type!));
         }
@@ -70,7 +70,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
     public override SyntaxNode? VisitPropertyDeclaration(PropertyDeclarationSyntax node)
     {
-      if (HasCanBeNullAttribute(node))
+      if (node.HasCanBeNullAttribute())
         return node.WithType(NullUtilities.ToNullable(node.Type));
 
       return node;
@@ -78,7 +78,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
     public override SyntaxNode? VisitFieldDeclaration(FieldDeclarationSyntax node)
     {
-      if (HasCanBeNullAttribute(node))
+      if (node.HasCanBeNullAttribute())
         return node.WithDeclaration(node.Declaration.WithType(NullUtilities.ToNullable(node.Declaration.Type)));
 
       return node;
@@ -92,28 +92,6 @@ namespace NullableReferenceTypesRewriter.Rewriters
           .OfType<IRewritable>()
           .Select(n => (n, RewriteCapability.ParameterChange | RewriteCapability.ReturnValueChange))
           .ToArray();
-    }
-
-    private static bool HasCanBeNullAttribute (MemberDeclarationSyntax node)
-    {
-      return node.AttributeLists.SelectMany (list => list.Attributes)
-          .Any (attr => attr.Name.ToString().Contains ("CanBeNull"));
-    }
-
-    private static bool HasCanBeNullAttribute (ParameterSyntax node)
-    {
-      return node.AttributeLists.SelectMany (list => list.Attributes)
-          .Any (attr => attr.Name.ToString().Contains ("CanBeNull"));
-    }
-
-    private static bool IsValueType (SemanticModel semanticModel, TypeSyntax declaration)
-    {
-      if (declaration is ArrayTypeSyntax)
-        return false;
-
-      var typeSymbol = semanticModel.GetTypeInfo (declaration).Type as INamedTypeSymbol;
-
-      return typeSymbol == null || typeSymbol.IsValueType;
     }
   }
 }

@@ -21,12 +21,12 @@ namespace NullableReferenceTypesRewriter.Rewriters
       if (node.Ancestors().Any(a => a.IsKind(SyntaxKind.InterfaceDeclaration)))
         return node;
 
-      if (node.Declaration.Variables.All(d => IsInitializedToNotNull(CurrentEvent.SemanticModel, d)))
+      if (node.Declaration.Variables.All(d => d.IsInitializedToNotNull(CurrentEvent.SemanticModel)))
         return node;
 
       var classSyntax = (ClassDeclarationSyntax) node.Ancestors().First(a => a.IsKind(SyntaxKind.ClassDeclaration));
 
-      if (node.Declaration.Variables.Any(d => IsInitializedToNull(CurrentEvent.SemanticModel, d)))
+      if (node.Declaration.Variables.Any(d => d.IsInitializedToNull(CurrentEvent.SemanticModel)))
         return ToNullable(node);
 
       var constructors = classSyntax.ChildNodes()
@@ -73,26 +73,6 @@ namespace NullableReferenceTypesRewriter.Rewriters
       }
 
       return fieldAssignments.All(a => !NullUtilities.CanBeNull(a.Right, semanticModel));
-    }
-
-    private bool IsInitializedToNull (SemanticModel semanticModel, VariableDeclaratorSyntax variableDeclarator)
-    {
-      if (variableDeclarator.Initializer != null)
-      {
-        return NullUtilities.CanBeNull (variableDeclarator.Initializer.Value, semanticModel);
-      }
-
-      return false;
-    }
-
-    private bool IsInitializedToNotNull (SemanticModel semanticModel, VariableDeclaratorSyntax variableDeclarator)
-    {
-      if (variableDeclarator.Initializer != null)
-      {
-        return !NullUtilities.CanBeNull (variableDeclarator.Initializer.Value, semanticModel);
-      }
-
-      return false;
     }
   }
 }

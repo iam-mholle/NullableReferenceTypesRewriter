@@ -43,21 +43,9 @@ namespace NullableReferenceTypesRewriter.Rewriters
     private static bool MayReturnNull (MethodDeclarationSyntax node, SemanticModel model)
     {
       return !(NullUtilities.ReturnsVoid (node)
-               || HasNullOrEmptyBody (node))
-             && (HasCanBeNullAttribute (node)
+               || node.HasNullOrEmptyBody ())
+             && (node.HasCanBeNullAttribute()
                  || NullUtilities.ReturnsNull (node, model));
-    }
-
-    private static bool HasNullOrEmptyBody (MethodDeclarationSyntax node)
-    {
-      return node.Body == null
-             || node.Body.Statements.Count == 0;
-    }
-
-    private static bool HasCanBeNullAttribute (MemberDeclarationSyntax node)
-    {
-      return node.AttributeLists.SelectMany (list => list.Attributes)
-          .Any (attr => attr.Name.ToString().Contains ("CanBeNull"));
     }
   }
 }

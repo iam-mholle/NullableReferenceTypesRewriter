@@ -62,7 +62,16 @@ namespace NullableReferenceTypesRewriter.Rewriters
       return node.WithParameterList(newList);
     }
 
-    public bool IsArgumentPossiblyNull(ISymbol symbol, Method method, int argumentIndex)
+    protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(INode method)
+    {
+      return method.Parents
+          .Select(p => p.From)
+          .OfType<IRewritable>()
+          .Select(r => (r, RewriteCapability.ParameterChange))
+          .ToArray();
+    }
+
+    private bool IsArgumentPossiblyNull(ISymbol symbol, Method method, int argumentIndex)
     {
       var syntax = method.MethodDeclaration;
 
@@ -84,15 +93,6 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
         return NullUtilities.CanBeNull (i.ArgumentList.Arguments[argumentIndex].Expression, method.SemanticModel);
       });
-    }
-
-    protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(INode method)
-    {
-      return method.Parents
-          .Select(p => p.From)
-          .OfType<IRewritable>()
-          .Select(r => (r, RewriteCapability.ParameterChange))
-          .ToArray();
     }
   }
 }
