@@ -398,6 +398,30 @@ public class A<T> where T : class
     }
 
     [Test]
+    public void MethodReturningGenericArgumentOfGenericClassType_WithStructConstraint_Unchanged ()
+    {
+      //language=C#
+      const string expected = @"
+  public T DoStuff(T obj)
+  {
+    return null;
+  }
+";
+      //language=C#
+      const string input = @"
+public class A<T> where T : struct
+{
+  public T DoStuff(T obj)
+  {
+    return null;
+  }
+}
+";
+
+      SimpleRewriteAssertion(expected, input, WrapperType.Method, CompileIn.Namespace);
+    }
+
+    [Test]
     public void MethodReturningGenericArgumentOfGenericClassType_WithReferenceTypeConstraint_Nullable ()
     {
       //language=C#
