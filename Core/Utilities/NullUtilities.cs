@@ -75,7 +75,7 @@ namespace NullableReferenceTypesRewriter.Utilities
       return typeSyntax;
     }
 
-    public static TypeSyntax ToNullableWithGenericsCheck (SemanticModel semanticModel, ClassDeclarationSyntax classDeclarationSyntax, TypeSyntax typeSyntax)
+    public static TypeSyntax ToNullableWithGenericsCheck (SemanticModel semanticModel, TypeDeclarationSyntax classDeclarationSyntax, TypeSyntax typeSyntax)
     {
       if (ShouldAnnotateType(semanticModel, classDeclarationSyntax, typeSyntax))
         return ToNullable(typeSyntax);
@@ -107,7 +107,7 @@ namespace NullableReferenceTypesRewriter.Utilities
       return method.TypeParameterList is { } && method.TypeParameterList.Parameters.Any(tp => typeSyntax.ToString().Equals(tp.ToString()));
     }
 
-    private static bool IsGenericClassParameter(ClassDeclarationSyntax @class, TypeSyntax typeSyntax)
+    private static bool IsGenericClassParameter(TypeDeclarationSyntax @class, TypeSyntax typeSyntax)
     {
       return @class.TypeParameterList is { } && @class.TypeParameterList.Parameters.Any(tp => typeSyntax.ToString().Equals(tp.ToString()));
     }
@@ -122,7 +122,7 @@ namespace NullableReferenceTypesRewriter.Utilities
       return methodDeclarationSyntax.ConstraintClauses.Concat(classClauses).Where(clause => clause.Name.ToString() == typeSyntax.ToString()).SelectMany(c => c.Constraints).ToArray();
     }
 
-    private static IReadOnlyCollection<TypeParameterConstraintSyntax> GetConstraints(ClassDeclarationSyntax classDeclarationSyntax, TypeSyntax typeSyntax)
+    private static IReadOnlyCollection<TypeParameterConstraintSyntax> GetConstraints(TypeDeclarationSyntax classDeclarationSyntax, TypeSyntax typeSyntax)
     {
       return classDeclarationSyntax.ConstraintClauses.Where(clause => clause.Name.ToString() == typeSyntax.ToString()).SelectMany(c => c.Constraints).ToArray();
     }
@@ -144,7 +144,7 @@ namespace NullableReferenceTypesRewriter.Utilities
       return true;
     }
 
-    private static bool ShouldAnnotateType(SemanticModel semanticModel, ClassDeclarationSyntax classDeclarationSyntax, TypeSyntax typeSyntax)
+    private static bool ShouldAnnotateType(SemanticModel semanticModel, TypeDeclarationSyntax classDeclarationSyntax, TypeSyntax typeSyntax)
     {
       if (IsGenericClassParameter(classDeclarationSyntax, typeSyntax))
       {

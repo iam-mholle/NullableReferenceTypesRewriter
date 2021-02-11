@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NullableReferenceTypesRewriter.Analysis;
 using NullableReferenceTypesRewriter.Utilities;
@@ -26,7 +27,12 @@ namespace NullableReferenceTypesRewriter.Rewriters
           .OfType<Property>()
           .Any(p => p.PropertyDeclarationSyntax.Type is NullableTypeSyntax))
       {
-        return node.WithType(NullUtilities.ToNullable(node.Type));
+        var propertyContainer = node.Ancestors().FirstOrDefault(a => a.IsKind(SyntaxKind.ClassDeclaration) || a.IsKind(SyntaxKind.InterfaceDeclaration)) as TypeDeclarationSyntax;
+
+        if (propertyContainer is null)
+          return node;
+
+        return node.WithType(NullUtilities.ToNullableWithGenericsCheck(SemanticModel, propertyContainer, node.Type));
       }
 
       return node;
