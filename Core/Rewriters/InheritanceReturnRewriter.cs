@@ -28,7 +28,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
       if (isAnyChildNullable)
       {
-        return node.WithReturnType(NullUtilities.ToNullable(node.ReturnType));
+        return NullUtilities.ToNullReturning(SemanticModel, node);
       }
 
       return node;
