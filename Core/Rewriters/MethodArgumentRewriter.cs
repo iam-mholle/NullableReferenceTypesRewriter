@@ -99,7 +99,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
     {
       var invocations = syntax.Body!.DescendantNodes()
           .Where(n => n.IsKind(SyntaxKind.InvocationExpression))
-          .Cast<InvocationExpressionSyntax>() // TODO: include ObjectCreationExpressionSyntax
+          .Cast<InvocationExpressionSyntax>()
           .Where(i => SymbolEqualityComparer.Default.Equals(method.SemanticModel.GetSymbolInfo(i.Expression).Symbol, symbol))
           .ToArray();
 
