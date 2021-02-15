@@ -12,24 +12,15 @@
 //
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.MSBuild;
-using NullableReferenceTypesRewriter.CastExpression;
-using NullableReferenceTypesRewriter.ClassFields;
-using NullableReferenceTypesRewriter.Inheritance;
-using NullableReferenceTypesRewriter.LocalDeclaration;
-using NullableReferenceTypesRewriter.MethodArguments;
-using NullableReferenceTypesRewriter.MethodReturn;
-using NullableReferenceTypesRewriter.Properties;
-using NullableReferenceTypesRewriter.Utilities;
+using NullableReferenceTypesRewriter.Analysis;
+using NullableReferenceTypesRewriter.Rewriters;
 
 namespace NullableReferenceTypesRewriter.ConsoleApplication
 {
@@ -48,44 +39,84 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
 
       var solution = await LoadSolutionSpace (solutionPath);
       var project = LoadProject (solution, projectName);
+      var compilation = project.GetCompilationAsync().GetAwaiter().GetResult();
+      var sharedCompilation = new SharedCompilation (compilation!);
 
-      IEnumerable<(Document, Document)> converted = await ApplyConverter (
-          project.Documents,
-          new IDocumentConverter[]
+      var graphBuilder = new MethodGraphBuilder(sharedCompilation);
+
+      foreach (var document in project.Documents)
+      {
+        var syntax = await document.GetSyntaxRootAsync()
+                     ?? throw new ArgumentException ($"Document '{document.FilePath}' does not support providing a syntax tree.");
+
+        graphBuilder.Visit (syntax);
+      }
+
+      var graph = graphBuilder.Graph;
+      var queue = new List<(RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>)>();
+
+      Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites = (b, c) => queue.Add((b, c));
+
+      var canBeNullRewriter = new CanBeNullRewriter(additionalRewrites);
+      var nullReturnRewriter = new NullReturnRewriter(additionalRewrites);
+      var castExpressionRewriter = new CastExpressionRewriter (additionalRewrites);
+      var localDeclarationRewriter = new LocalDeclarationRewriter (additionalRewrites);
+      var methodArgumentRewriter = new MethodArgumentRewriter (additionalRewrites);
+      var uninitializedFieldRewriter = new UninitializedFieldRewriter (additionalRewrites);
+      var inheritanceParameterRewriter = new InheritanceParameterRewriter (additionalRewrites);
+      var inheritanceReturnRewriter = new InheritanceReturnRewriter (additionalRewrites);
+      var defaultParameterRewriter = new DefaultParameterRewriter (additionalRewrites);
+      var uninitializedPropertyRewriter = new UninitializedPropertyRewriter(additionalRewrites);
+      var propertyNullReturnRewriter = new PropertyNullReturnRewriter(additionalRewrites);
+      var inheritancePropertyRewriter = new InheritancePropertyRewriter(additionalRewrites);
+      var uninitializedEventRewriter = new UninitializedEventRewriter(additionalRewrites);
+
+      graph.ForEachNode(n =>
+      {
+        n.Rewrite(canBeNullRewriter);
+        n.Rewrite(nullReturnRewriter);
+        n.Rewrite(castExpressionRewriter);
+        n.Rewrite(localDeclarationRewriter);
+        n.Rewrite(methodArgumentRewriter);
+        n.Rewrite(uninitializedFieldRewriter);
+        n.Rewrite(inheritanceParameterRewriter);
+        n.Rewrite(inheritanceReturnRewriter);
+        n.Rewrite(defaultParameterRewriter);
+        n.Rewrite(uninitializedPropertyRewriter);
+        n.Rewrite(propertyNullReturnRewriter);
+        n.Rewrite(inheritancePropertyRewriter);
+        n.Rewrite(uninitializedEventRewriter);
+      }, n => n.GetType() != typeof(ExternalMethod));
+
+      for (var i = 0; i < queue.Count; i++)
+      {
+        var item = queue[i];
+
+        foreach (var (node, rewriteCapability) in item.Item2)
+        {
+          if ((rewriteCapability & RewriteCapability.ParameterChange) == RewriteCapability.ParameterChange)
           {
-                new MethodReturnNullDocumentConverter(),
-                new LocalDeclarationNullDocumentConverter(),
-                new CastExpressionNullDocumentConverter(),
-                new MethodArgumentFromInvocationNullDocumentConverter(),
-                new PropertyNullAnnotatorDocumentConverter(),
-                new ClassFieldNotInitializedDocumentConverter(),
-          });
-
-       converted = await new InheritanceProjectConverter().Convert (converted);
-
-      foreach (var (oldDocument, document) in converted)
-      {
-        await WriteChanges (oldDocument, document);
+            node.Rewrite(defaultParameterRewriter);
+            node.Rewrite(castExpressionRewriter);
+            node.Rewrite(localDeclarationRewriter);
+            node.Rewrite(methodArgumentRewriter);
+            node.Rewrite(inheritanceParameterRewriter);
+            node.Rewrite(uninitializedFieldRewriter);
+            node.Rewrite(uninitializedPropertyRewriter);
+            node.Rewrite(uninitializedEventRewriter);
+          }
+          if ((rewriteCapability & RewriteCapability.ReturnValueChange) == RewriteCapability.ReturnValueChange)
+          {
+            node.Rewrite(inheritanceReturnRewriter);
+            node.Rewrite(localDeclarationRewriter);
+            node.Rewrite(propertyNullReturnRewriter);
+            node.Rewrite(inheritancePropertyRewriter);
+            node.Rewrite(nullReturnRewriter);
+          }
+        }
       }
-    }
 
-    private static async Task WriteChanges (Document oldDocument, Document newDocument)
-    {
-      try
-      {
-        var newRootNode = await newDocument.GetSyntaxRootAsync();
-        var oldRootNode = await oldDocument.GetSyntaxRootAsync();
-
-        if (oldRootNode == newRootNode) return;
-
-        using var fileStream = new FileStream (newDocument.FilePath!, FileMode.Truncate);
-        using var writer = new StreamWriter (fileStream, Encoding.Default);
-        newRootNode!.WriteTo (writer);
-      }
-      catch (IOException ex)
-      {
-        throw new InvalidOperationException ($"Unable to write source file '{newDocument.FilePath}'.", ex);
-      }
+      sharedCompilation.WriteChanges();
     }
 
     private static Project LoadProject (Solution solution, string projectName)
@@ -98,12 +129,6 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
         project = project.WithCompilationOptions (compilationOptions);
 
       return project;
-    }
-
-    private static Task<(Document, Document)[]> ApplyConverter (IEnumerable<Document> documents, IEnumerable<IDocumentConverter> converters)
-    {
-      var tasks = documents.Select (async doc => (doc, await ConverterUtilities.ApplyAll (doc, converters)));
-      return Task.WhenAll(tasks);
     }
 
     private static Task<Solution> LoadSolutionSpace (string solutionPath)
