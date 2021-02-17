@@ -9,8 +9,6 @@ using NullableReferenceTypesRewriter.Utilities;
 
 namespace NullableReferenceTypesRewriter.Rewriters
 {
-  // TODO: Does not work with .ctor calls
-  // TODO: Somehow doesn't work sometimes
   public class MethodArgumentRewriter : RewriterBase
   {
     public MethodArgumentRewriter(Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> additionalRewrites)
