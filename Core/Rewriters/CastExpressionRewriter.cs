@@ -18,6 +18,7 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
     public override SyntaxNode? VisitCastExpression (CastExpressionSyntax node)
     {
+      node = (CastExpressionSyntax) base.VisitCastExpression(node)!;
       var type = node.Type;
       if (type is NullableTypeSyntax)
         return node;
