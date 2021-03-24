@@ -94,8 +94,8 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
 
         foreach (var (node, rewriteCapability) in item.Item2)
         {
-          if ((rewriteCapability & RewriteCapability.ParameterChange) == RewriteCapability.ParameterChange)
-          {
+          // if ((rewriteCapability & RewriteCapability.ParameterChange) == RewriteCapability.ParameterChange)
+          // {
             node.Rewrite(defaultParameterRewriter);
             node.Rewrite(castExpressionRewriter);
             node.Rewrite(localDeclarationRewriter);
@@ -104,15 +104,15 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
             node.Rewrite(uninitializedFieldRewriter);
             node.Rewrite(uninitializedPropertyRewriter);
             node.Rewrite(uninitializedEventRewriter);
-          }
-          if ((rewriteCapability & RewriteCapability.ReturnValueChange) == RewriteCapability.ReturnValueChange)
-          {
+          // }
+          // if ((rewriteCapability & RewriteCapability.ReturnValueChange) == RewriteCapability.ReturnValueChange)
+          // {
             node.Rewrite(inheritanceReturnRewriter);
             node.Rewrite(localDeclarationRewriter);
             node.Rewrite(propertyNullReturnRewriter);
             node.Rewrite(inheritancePropertyRewriter);
             node.Rewrite(nullReturnRewriter);
-          }
+          // }
         }
       }
 

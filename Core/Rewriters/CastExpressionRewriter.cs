@@ -18,7 +18,16 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
     public override SyntaxNode? VisitCastExpression (CastExpressionSyntax node)
     {
-      node = (CastExpressionSyntax) base.VisitCastExpression(node)!;
+      var possiblyRewrittenNode = (CastExpressionSyntax) base.VisitCastExpression(node)!;
+
+      if (possiblyRewrittenNode != node
+          && possiblyRewrittenNode.DescendantNodes().Any(n => n.IsKind(SyntaxKind.CastExpression)))
+      {
+        // Recompilation needed.
+        AddDeferredRewrite((IRewritable)CurrentNode, RewriteCapability.ReturnValueChange);
+        return possiblyRewrittenNode;
+      }
+
       var type = node.Type;
       if (type is NullableTypeSyntax)
         return node;
@@ -30,8 +39,9 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
     protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites (INode node)
     {
-      return node.Parents.Select(p => p.From).OfType<IRewritable>()
-          .Select(r => (r, RewriteCapability.ReturnValueChange))
+      return base.GetAdditionalRewrites(node)
+          .Concat(node.Parents.Select(p => p.From).OfType<IRewritable>()
+          .Select(r => (r, RewriteCapability.ReturnValueChange)))
           .Concat(node.Children
               .Select(c => c.To)
               .OfType<IRewritable>()

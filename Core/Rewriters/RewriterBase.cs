@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -13,6 +14,9 @@ namespace NullableReferenceTypesRewriter.Rewriters
   public abstract class RewriterBase : CSharpSyntaxRewriter
   {
     private readonly Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>> _additionalRewrites;
+
+    private INode? _deferredRewritesScope = null;
+    private List<(IRewritable rewritable, RewriteCapability capability)>? _deferredRewrites = null;
 
     protected Method CurrentMethod = null!;
     protected Field CurrentField = null!;
@@ -39,6 +43,8 @@ namespace NullableReferenceTypesRewriter.Rewriters
     {
       CurrentField = field;
 
+      EnsureCleanDeferredRewritables();
+
       try
       {
         var rewritten = VisitFieldDeclaration ((FieldDeclarationSyntax) field.RewritableSyntaxNode);
@@ -63,6 +69,8 @@ namespace NullableReferenceTypesRewriter.Rewriters
     {
       CurrentProperty = property;
 
+      EnsureCleanDeferredRewritables();
+
       try
       {
         var rewritten = VisitPropertyDeclaration ((PropertyDeclarationSyntax) property.RewritableSyntaxNode);
@@ -86,6 +94,8 @@ namespace NullableReferenceTypesRewriter.Rewriters
     public SyntaxNode Rewrite (Method method)
     {
       CurrentMethod = method;
+
+      EnsureCleanDeferredRewritables();
 
       try
       {
@@ -116,6 +126,8 @@ namespace NullableReferenceTypesRewriter.Rewriters
     {
       CurrentEvent = @event;
 
+      EnsureCleanDeferredRewritables();
+
       try
       {
         var rewritten = @event.RewritableSyntaxNode switch
@@ -143,7 +155,22 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
     protected virtual IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites (INode node)
     {
-      return Array.Empty<(IRewritable, RewriteCapability)>();
+      return ((IReadOnlyCollection<(IRewritable, RewriteCapability)>?) _deferredRewrites)
+             ?? Array.Empty<(IRewritable, RewriteCapability)>();
+    }
+
+    protected void AddDeferredRewrite(IRewritable rewritable, RewriteCapability capability)
+    {
+      _deferredRewrites?.Add((rewritable, capability));
+    }
+
+    private void EnsureCleanDeferredRewritables()
+    {
+      if (_deferredRewritesScope != CurrentNode)
+      {
+        _deferredRewritesScope = CurrentNode;
+        _deferredRewrites = new List<(IRewritable rewritable, RewriteCapability capability)>();
+      }
     }
   }
 }

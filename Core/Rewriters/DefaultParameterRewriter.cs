@@ -55,10 +55,12 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
     protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(INode method)
     {
-      return method.Parents
-          .Select(p => p.From)
-          .OfType<IRewritable>()
-          .Select(r => (r, RewriteCapability.ParameterChange))
+      return base.GetAdditionalRewrites(method)
+          .Concat(
+              method.Parents
+                  .Select(p => p.From)
+                  .OfType<IRewritable>()
+                  .Select(r => (r, RewriteCapability.ParameterChange)))
           .ToArray();
     }
   }

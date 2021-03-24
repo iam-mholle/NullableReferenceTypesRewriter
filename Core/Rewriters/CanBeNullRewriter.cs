@@ -88,9 +88,11 @@ namespace NullableReferenceTypesRewriter.Rewriters
     {
       var children = node.Children.Select(d => d.To);
       var parents = node.Parents.Select(d => d.From);
-      return children.Concat(parents)
-          .OfType<IRewritable>()
-          .Select(n => (n, RewriteCapability.ParameterChange | RewriteCapability.ReturnValueChange))
+      return base.GetAdditionalRewrites(node)
+          .Concat(
+              children.Concat(parents)
+                  .OfType<IRewritable>()
+                  .Select(n => (n, RewriteCapability.ParameterChange | RewriteCapability.ReturnValueChange)))
           .ToArray();
     }
   }

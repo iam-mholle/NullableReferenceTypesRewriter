@@ -27,6 +27,48 @@ public object DoStuff()
 ",
           WrapperType.Method);
 
+    [Test]
+    public void TwoDirectCasts_Stage1_NullableVariable()
+      => SimpleRewriteAssertion(
+          /* language=C# */ @"
+public string DoStuff()
+{
+  string? obj = null;
+
+  return (string) (object?) obj;
+}
+",
+          /* language=C# */ @"
+public string DoStuff()
+{
+  string? obj = null;
+
+  return (string) (object) obj;
+}
+",
+          WrapperType.Method,
+          deferredRewritesPredicate: c => c.Count == 1);
+
+    [Test]
+    public void TwoDirectCasts_Stage2_NullableVariable()
+      => SimpleRewriteAssertion(
+          /* language=C# */ @"
+public string DoStuff()
+{
+  string? obj = null;
+
+  return (string?) (object?) obj;
+}
+",
+          /* language=C# */ @"
+public string DoStuff()
+{
+  string? obj = null;
+
+  return (string) (object?) obj;
+}
+",
+          WrapperType.Method);
 
     [Test]
     public void DirectCast_NullableReturnValue ()

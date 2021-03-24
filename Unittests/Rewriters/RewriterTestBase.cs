@@ -28,9 +28,11 @@ namespace NullableReferenceTypesRewriter.UnitTests.Rewriters
       Namespace,
     }
 
-    protected void SimpleRewriteAssertion(string expected, string input, WrapperType wrapperType, CompileIn compileIn = CompileIn.Class)
+    protected void SimpleRewriteAssertion(string expected, string input, WrapperType wrapperType, CompileIn compileIn = CompileIn.Class, Func<IReadOnlyCollection<(IRewritable, RewriteCapability)>, bool>? deferredRewritesPredicate = null)
     {
-      var (semantic, root) = compileIn switch
+      deferredRewritesPredicate ??= c => c.Count == 0;
+
+          var (semantic, root) = compileIn switch
       {
           CompileIn.Class => CompiledSourceFileProvider.CompileInClass ("A", input),
           CompileIn.Namespace => CompiledSourceFileProvider.CompileInNameSpace("A", input),
@@ -47,7 +49,9 @@ namespace NullableReferenceTypesRewriter.UnitTests.Rewriters
           _ => throw new ArgumentOutOfRangeException(),
       };
 
-      var sut = (RewriterBase) Activator.CreateInstance(typeof(TRewriter), (Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>>) ((b, c) => {}));
+      var deferredRewrites = new List<(IRewritable, RewriteCapability)>();
+
+      var sut = (RewriterBase) Activator.CreateInstance(typeof(TRewriter), (Action<RewriterBase, IReadOnlyCollection<(IRewritable, RewriteCapability)>>) ((b, c) => deferredRewrites.AddRange(c)));
       var result = wrapperType switch
       {
           WrapperType.Method => sut.Rewrite((Method) node),
@@ -58,7 +62,8 @@ namespace NullableReferenceTypesRewriter.UnitTests.Rewriters
           _ => throw new ArgumentOutOfRangeException(),
       };
 
-      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+      Assert.That(result.ToString().Trim(), Is.EqualTo(expected.Trim()));
+      Assert.That(deferredRewritesPredicate(deferredRewrites), Is.True);
     }
 
     protected void SimpleUnchangedAssertion(string input, WrapperType wrapperType, CompileIn compileIn = CompileIn.Class)

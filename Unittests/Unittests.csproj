@@ -4,7 +4,7 @@
     <TargetFramework>net472</TargetFramework>
     <RootNamespace>NullableReferenceTypesRewriter.UnitTests</RootNamespace>
     <IsPackable>false</IsPackable>
-    <LangVersion>8</LangVersion>
+    <LangVersion>9</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Nullable>enable</Nullable>
   </PropertyGroup>
