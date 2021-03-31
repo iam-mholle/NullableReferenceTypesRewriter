@@ -46,6 +46,11 @@ namespace NullableReferenceTypesRewriter.Rewriters
       var parametersToAnnotate = new List<int>();
       for (var i = 0; i < node.ParameterList.Parameters.Count; i++)
       {
+        var parameter = node.ParameterList.Parameters[i];
+
+        if (parameter.Type!.IsValueType(SemanticModel))
+          continue;
+
         foreach (var parent in parents)
         {
           if (parent is Method parentMethod)
