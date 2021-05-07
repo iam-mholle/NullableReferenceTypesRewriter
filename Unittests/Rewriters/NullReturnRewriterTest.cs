@@ -54,6 +54,20 @@ public object? DoStuff()
     }
 
     [Test]
+    public void MethodReturningNull_NotNullAnnotated_SameInstance ()
+    {
+      //language=C#
+      const string input = @"
+[NotNull]
+public object? DoStuff()
+{
+  return null;
+}
+";
+      SimpleUnchangedAssertion(input, WrapperType.Method);
+    }
+
+    [Test]
     public void MethodReturningMethodReturningNullable_ReturnValueNullable ()
     {
       //language=C#
@@ -373,6 +387,7 @@ public T DoStuff<T>(T obj)
     return null;
   }
 ";
+      //language=C#
       const string input = @"
 public class A<T>
 {

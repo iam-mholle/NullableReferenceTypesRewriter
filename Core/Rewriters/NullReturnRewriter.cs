@@ -37,6 +37,12 @@ namespace NullableReferenceTypesRewriter.Rewriters
     {
       if (MayReturnNull(node, SemanticModel))
       {
+        if (node.HasNotNullAttribute())
+        {
+          Console.WriteLine($"ERROR: Trying to annotate NotNull method '{node.ToString()}' in '{node.SyntaxTree.FilePath}'.");
+          return node;
+        }
+
         return NullUtilities.ToNullReturning (SemanticModel, node);
       }
 

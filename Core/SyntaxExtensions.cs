@@ -27,6 +27,9 @@ namespace NullableReferenceTypesRewriter
     public static bool HasNotNullAttribute(this FieldDeclarationSyntax fieldDeclaration)
       => fieldDeclaration.AttributeLists.Any(l => l.Attributes.Any(a => a.ToString().EndsWith("NotNull")));
 
+    public static bool HasNotNullAttribute(this MethodDeclarationSyntax methodDeclaration)
+      => methodDeclaration.AttributeLists.Any(l => l.Attributes.Any(a => a.ToString().EndsWith("NotNull")));
+
     public static bool HasCanBeNullAttribute (this MemberDeclarationSyntax member) =>
         member.AttributeLists.SelectMany (list => list.Attributes)
             .Any (attr => attr.Name.ToString().Contains ("CanBeNull"));
