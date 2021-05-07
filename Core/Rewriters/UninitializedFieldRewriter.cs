@@ -71,7 +71,15 @@ namespace NullableReferenceTypesRewriter.Rewriters
       var isInitializedToNotNull = constructors.All(c => VariableInitializedToNotNullInCtorChain(SemanticModel, c, node.Declaration.Variables.First()));
 
       if (constructors.Length == 0 || !isInitializedToNotNull)
+      {
+        if (node.HasNotNullAttribute())
+        {
+          Console.WriteLine($"ERROR: Trying to annotate NotNull field '{node.ToString()}' in '{node.SyntaxTree.FilePath}'.");
+          return node;
+        }
+
         return ToNullable(node);
+      }
 
       return node;
 

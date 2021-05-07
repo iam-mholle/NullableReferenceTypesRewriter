@@ -281,6 +281,23 @@ public A(bool _) { }
     }
 
     [Test]
+    public void Uninitialized_NotNullAttribute_Unchanged ()
+    {
+      //language=C#
+      const string expected = @"
+[NotNull]
+private string test;
+";
+      //language=C#
+      const string input = @"
+[NotNull]
+private string test;
+";
+
+      SimpleRewriteAssertion(expected, input, WrapperType.Field);
+    }
+
+    [Test]
     public void InitializedInStaticCtor_Unchanged ()
     {
       //language=C#
