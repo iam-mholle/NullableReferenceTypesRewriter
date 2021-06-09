@@ -42,14 +42,9 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
       var type = node.Declaration.Type;
 
-      var typeInfo = SemanticModel.GetTypeInfo(type);
-
       var isNullable = node.Declaration.Variables
           .Where (variable => variable.Initializer != null)
           .Any (variable => NullUtilities.CanBeNull (variable.Initializer!.Value, SemanticModel));
-
-      isNullable |= typeInfo.Type!.IsReferenceType
-                    && node.Declaration.Variables.Any(v => v.Initializer is null);
 
       return isNullable
           ? node.WithDeclaration (node.Declaration.WithType (NullUtilities.ToNullable (type)))
