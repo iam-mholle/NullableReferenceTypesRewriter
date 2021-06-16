@@ -70,10 +70,12 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
       var propertyNullReturnRewriter = new PropertyNullReturnRewriter(additionalRewrites);
       var inheritancePropertyRewriter = new InheritancePropertyRewriter(additionalRewrites);
       var uninitializedEventRewriter = new UninitializedEventRewriter(additionalRewrites);
+      var externalAnnotatedSymbolRewriter = new ExternalAnnotatedSymbolRewriter(additionalRewrites);
 
       graph.ForEachNode(n =>
       {
         n.Rewrite(canBeNullRewriter);
+        n.Rewrite(externalAnnotatedSymbolRewriter);
         n.Rewrite(nullReturnRewriter);
         n.Rewrite(castExpressionRewriter);
         n.Rewrite(localDeclarationRewriter);
