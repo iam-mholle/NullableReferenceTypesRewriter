@@ -92,6 +92,42 @@ public void CallAboveMethod()
     }
 
     [Test]
+    public void SingleParameter_ArgumentCheck_NotNullable()
+    {
+      //language=C#
+      const string expected = @"
+public void DoStuff(string something)
+{
+  ArgumentUtility.CheckNotNull (""something"", something);
+}
+";
+      var (semantic, root) = CompiledSourceFileProvider.CompileInClass (
+          "A",
+          //language=C#
+          @"
+public void DoStuff(string something)
+{
+  ArgumentUtility.CheckNotNull (""something"", something);
+}
+
+public void CallAboveMethod()
+{
+  DoStuff(null);
+}
+");
+      Method method = null!;
+      var callingSyntax = (MethodDeclarationSyntax) root.DescendantNodes ().Last(n => n.IsKind (SyntaxKind.MethodDeclaration));
+      var callingMethod = CreateMethodWrapper(callingSyntax, semantic);
+      var syntax = (MethodDeclarationSyntax) root.DescendantNodes ().First(n => n.IsKind (SyntaxKind.MethodDeclaration));
+      method = CreateMethodWrapper (syntax, semantic, () => new []{ new Dependency(() => callingMethod, () => method, DependencyType.Usage) });
+      var sut = new MethodArgumentRewriter((b, c) => { });
+
+      var result = sut.Rewrite (method);
+
+      Assert.That (result.ToString().Trim(), Is.EqualTo (expected.Trim()));
+    }
+
+    [Test]
     public void SingleParameter_AlreadyNullable_Unchanged()
     {
       //language=C#

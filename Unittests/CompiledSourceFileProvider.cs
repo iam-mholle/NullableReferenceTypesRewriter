@@ -12,6 +12,7 @@
 //
 
 using System;
+using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -86,6 +87,7 @@ namespace NullableReferenceTypesRewriter.UnitTests
       var nameSpaceTemplate =
           "using System;\r\n" +
           "using JetBrains.Annotations;\r\n" +
+          "using Remotion.Utilities;\r\n" +
           $"namespace {nameSpaceName} {{\r\n" +
           $"{nameSpaceContent}\r\n" +
           "}";
@@ -102,7 +104,8 @@ namespace NullableReferenceTypesRewriter.UnitTests
           .AddReferences (
               MetadataReference.CreateFromFile (typeof (object).Assembly.Location),
               MetadataReference.CreateFromFile (TestContext.CurrentContext.TestDirectory + @"\resources\Jetbrains.Annotations.dll"))
-          .AddSyntaxTrees (syntaxTree);
+          .AddSyntaxTrees (syntaxTree)
+          .AddSyntaxTrees (CSharpSyntaxTree.ParseText(File.ReadAllText("ArgumentUtility.cs"), path: "ArgumentUtility.cs"));
 
       compilation = compilation.WithOptions (
           compilation.Options.WithNullableContextOptions (NullableContextOptions.Enable));

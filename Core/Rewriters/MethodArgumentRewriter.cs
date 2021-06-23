@@ -14,6 +14,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -73,9 +74,9 @@ namespace NullableReferenceTypesRewriter.Rewriters
       {
         var existingParameter = newList.Parameters[parameterIndex];
 
-        if (existingParameter.HasNotNullAttribute())
+        if (existingParameter.HasNotNullAttribute() || IsParameterCheckedForNull(existingParameter, node))
         {
-          Console.WriteLine($"ERROR: Trying to annotate NotNull parameter {existingParameter.ToString()} in {CurrentNode}");
+          Console.WriteLine($"ERROR: Trying to annotate NotNull or checked parameter {existingParameter.ToString()} in {CurrentNode}");
         }
         else
         {
@@ -86,6 +87,22 @@ namespace NullableReferenceTypesRewriter.Rewriters
       }
 
       return node.WithParameterList(newList);
+    }
+
+    private bool IsParameterCheckedForNull(ParameterSyntax existingParameter, BaseMethodDeclarationSyntax node)
+    {
+      var argCheckType = SemanticModel.Compilation.GetTypeByMetadataName("Remotion.Utilities.ArgumentUtility")!;
+      var argCheckMethods = argCheckType.GetMembers().Where(m => m.Name.Contains("NotNull") && !m.Name.Contains("ItemsNotNull"));
+      return node.Body
+          ?.Statements
+          .OfType<ExpressionStatementSyntax>()
+          .Select(s => s.Expression)
+          .OfType<InvocationExpressionSyntax>()
+          .Where(e => e.ArgumentList.Arguments.Any(a => a.Expression is IdentifierNameSyntax e && e.Identifier.Value == existingParameter.Identifier.Value))
+          .Select(e => SemanticModel.GetSymbolInfo(e).Symbol?.OriginalDefinition)
+          .Where(s => s != null)
+          .Any(m => argCheckMethods.Any(a => SymbolEqualityComparer.Default.Equals(m, a)))
+             ?? false;
     }
 
     protected override IReadOnlyCollection<(IRewritable, RewriteCapability)> GetAdditionalRewrites(INode method)

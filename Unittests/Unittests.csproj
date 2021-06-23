@@ -32,6 +32,13 @@
     <_Resources Include="$(ProjectDir)\resources\**\*.*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="ArgumentUtility.cs" />
+    <Content Include="ArgumentUtility.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
   <Target Name="CustomAfterBuild" AfterTargets="AfterBuild">
   <Copy SourceFiles="@(_Resources)" DestinationFolder="$(OutputPath)\resources\%(RecursiveDir)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" Retries="3" RetryDelayMilliseconds="300" />
   </Target>
