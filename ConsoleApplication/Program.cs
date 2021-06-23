@@ -74,8 +74,8 @@ namespace NullableReferenceTypesRewriter.ConsoleApplication
 
       graph.ForEachNode(n =>
       {
-        n.Rewrite(canBeNullRewriter);
         n.Rewrite(externalAnnotatedSymbolRewriter);
+        n.Rewrite(canBeNullRewriter);
         n.Rewrite(nullReturnRewriter);
         n.Rewrite(castExpressionRewriter);
         n.Rewrite(localDeclarationRewriter);
