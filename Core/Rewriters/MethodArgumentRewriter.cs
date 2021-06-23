@@ -91,8 +91,18 @@ namespace NullableReferenceTypesRewriter.Rewriters
 
     private bool IsParameterCheckedForNull(ParameterSyntax existingParameter, BaseMethodDeclarationSyntax node)
     {
-      var argCheckType = SemanticModel.Compilation.GetTypeByMetadataName("Remotion.Utilities.ArgumentUtility")!;
-      var argCheckMethods = argCheckType.GetMembers().Where(m => m.Name.Contains("NotNull") && !m.Name.Contains("ItemsNotNull"));
+      var argCheckType = SemanticModel.Compilation.References
+          .Select(SemanticModel.Compilation.GetAssemblyOrModuleSymbol)
+          .OfType<IAssemblySymbol>()
+          .Select(assemblySymbol => assemblySymbol.GetTypeByMetadataName("Remotion.Utilities.ArgumentUtility"))
+          .Where(s => s != null)
+          .OrderByDescending(s => s!.GetMembers().Length)
+          .FirstOrDefault();
+
+      if (argCheckType is null)
+        return false;
+
+      var argCheckMethods = argCheckType!.GetMembers().Where(m => m.Name.Contains("NotNull") && !m.Name.Contains("ItemsNotNull"));
       return node.Body
           ?.Statements
           .OfType<ExpressionStatementSyntax>()
